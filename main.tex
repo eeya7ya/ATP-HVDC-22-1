@@ -7,7 +7,7 @@
 \usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
-\usepackage{xcolor}
+\usepackage[table]{xcolor}
 \usepackage{multirow}
 \usepackage{booktabs}
 \usepackage{hyperref}
@@ -261,7 +261,9 @@ Line-mode impedance $Z_{C1}$ & 561.86 $\Omega$ \\
 Zero-mode impedance $Z_{C0}$ & 280.90 $\Omega$ \\
 \hline
 \end{tabular}
-\end{table}analysis, which provides clearer fault signatures for all four protection methods.
+\end{table}
+
+analysis, which provides clearer fault signatures for all four protection methods.
 
 \subsection{Fault Analysis: Internal Faults}
 
@@ -587,7 +589,7 @@ where $\alpha_E = 0.5$ balances the energy-vector and ROCOTW contributions.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.85\columnwidth]{fig_energy_vectors.png}
+    \includegraphics[width=0.85\columnwidth]{Wavelet.png}
     \caption{Reference energy vectors (db4) for internal and external faults showing normalized energy distribution across four decomposition detail levels. The internal reference exhibits higher energy concentration at coarser scales (levels 1--2), while the external reference shows a cross-over pattern characteristic of reflected wave signatures.}
     \label{fig:energy_vectors}
 \end{figure}
@@ -655,7 +657,7 @@ For a measured ROCOTW pattern, DTW distances to both references are computed, an
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.85\columnwidth]{fig_reference_curves.png}
+    \includegraphics[width=0.85\columnwidth]{DYNAMIC_TIME_WARPING.png}
     \caption{Normalized ROCOTW reference curves used for DTW, Cross-Correlation, and Fréchet Distance analysis. The internal reference (green) shows a broad sustained profile, while the external reference (red) exhibits a pronounced secondary oscillation due to wave reflections at the protection zone boundary.}
     \label{fig:reference_curves}
 \end{figure}
@@ -816,7 +818,7 @@ Fig.~\ref{fig:curve_comparison} demonstrates the curve matching process for repr
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{fig_curve_comparison.png}
+    \includegraphics[width=\columnwidth]{FD.png}
     \caption{Fréchet distance curve matching: (a) internal fault case showing closer alignment with internal reference, (b) external fault case showing closer alignment with external reference. Shaded regions indicate the area contributing to the minimum Fréchet distance.}
     \label{fig:curve_comparison}
 \end{figure}
@@ -825,7 +827,7 @@ The comprehensive classification results across multiple test cases are presente
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.85\columnwidth]{fig_fin_fout_results.png}
+    \includegraphics[width=0.85\columnwidth]{Figure_1.png}
     \caption{Fréchet distance classification results showing $F_{int}$ and $F_{ext}$ values for internal faults (50--250 km) and external faults. Green triangles indicate correct classification.}
     \label{fig:fin_fout_results}
 \end{figure}
@@ -1182,7 +1184,7 @@ The ensemble method was evaluated on the same 42 fault scenarios used for indivi
 \bottomrule
 \end{tabular}
 \\[0.5em]
-\footnotesize{\cellcolor{green!25} T = Correct classification;\quad \cellcolor{red!25} F = Incorrect classification. Highlighted cells indicate misclassified cases.}
+\footnotesize{\colorbox{green!25}{T} = Correct classification;\quad \colorbox{red!25}{F} = Incorrect classification. Highlighted cells indicate misclassified cases.}
 \end{table*}
 
 \subsection{Performance Analysis}
