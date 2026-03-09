@@ -30,7 +30,7 @@
 
 
 \begin{abstract}
-High Voltage Direct Current (HVDC) transmission systems require rapid and reliable fault detection mechanisms to ensure system stability and prevent cascading failures. Traveling wave (TW)-based protection schemes have emerged as promising solutions due to their inherent speed advantages. However, the comparative performance of different TW-based algorithms under varying fault conditions remains inadequately characterized. This paper presents a comprehensive evaluation of four advanced TW protection methods for MMC-HVDC transmission lines: Wavelet (WL) energy and ROCOTW analysis with an updated reference curve, Dynamic Time Warping (DTW) distance metric, Cross-Correlation pattern matching, and Fréchet Distance of Rate of Change of Traveling Waves (ROCOTW). Additionally, a novel weighted voting ensemble approach that synergistically combines all four methods is proposed. Through systematic ATP-EMTP simulations of a 300~km, $\pm$500~kV bipolar HVDC system, each algorithm is evaluated across 42 fault scenarios including internal faults at five locations (50--250~km) and external faults (forward and reverse) with fault resistances from 0~$\Omega$ to 750~$\Omega$. Individual method accuracies on the 42-case study are: DTW 88.1\%, Correlation 81.0\%, WL 76.2\%, and Fréchet 73.8\%. The proposed ensemble achieves an overall accuracy of 85.7\% (36/42 cases) with 100\% accuracy for fault resistances of 400--750~$\Omega$ and 92.6\% accuracy when reporting HIGH confidence. All methods operate within the critical 2--3~ms decision window required for HVDC protection. The study provides practical recommendations for algorithm selection based on application requirements, with the ensemble approach recommended for systems requiring balanced dependability and security performance.
+High Voltage Direct Current (HVDC) transmission systems require rapid and reliable fault detection mechanisms to ensure system stability and prevent cascading failures. Traveling wave (TW)-based protection schemes have emerged as promising solutions due to their inherent speed advantages. However, the comparative performance of different TW-based algorithms under varying fault conditions remains inadequately characterized. This paper presents a comprehensive evaluation of four advanced TW protection methods for MMC-HVDC transmission lines: Wavelet (WL) energy and ROCOTW analysis with an updated reference curve, Dynamic Time Warping (DTW) distance metric, Cross-Correlation pattern matching, and Fréchet Distance of Rate of Change of Traveling Waves (ROCOTW). Additionally, a novel weighted voting ensemble approach that synergistically combines all four methods is proposed. Through systematic ATP-EMTP simulations of a 300~km, $\pm$500~kV bipolar HVDC system, each algorithm is evaluated across 42 fault scenarios including internal faults at five locations (50--250~km) and external faults (forward and reverse) with fault resistances from 0~$\Omega$ to 750~$\Omega$. Individual method accuracies on the 42-case study are: TW (Dist) 83.3\%, Correlation 81.0\%, WL (Fin/Fout) 81.0\%, and DTW 71.4\%. The proposed ensemble achieves an overall accuracy of 85.7\% (36/42 cases) with 100\% accuracy for fault resistances of 400--750~$\Omega$ and 92.6\% accuracy when reporting HIGH confidence. All methods operate within the critical 2--3~ms decision window required for HVDC protection. The study provides practical recommendations for algorithm selection based on application requirements, with the ensemble approach recommended for systems requiring balanced dependability and security performance.
 \end{abstract}
 
 % Keywords
@@ -1129,83 +1129,77 @@ Fig.~\ref{fig:ensemble_architecture} illustrates the ensemble protection system 
 
 The ensemble method was evaluated on the same 42 fault scenarios used for individual algorithm testing. Table~\ref{tab:ensemble_results} presents the complete ensemble classification results with individual method contributions.
 
+% Color helpers for T/F cells
+\newcommand{\TT}{\cellcolor{green!25}T}
+\newcommand{\FF}{\cellcolor{red!25}F}
+
 \begin{table*}[!t]
 \centering
-\caption{Ensemble Classification Results with Individual Method Votes (42 Cases)}
+\caption{Classification Comparison: Individual Methods vs.\ Ensemble for All 42 Cases (T = Correct, F = Incorrect)}
 \label{tab:ensemble_results}
 \small
-\begin{tabular}{@{}llcccccccccc@{}}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}clccccccc@{}}
 \toprule
-& & \multicolumn{4}{c}{\textbf{Individual Method Decisions}} & \multicolumn{2}{c}{\textbf{Votes}} & \multicolumn{3}{c}{\textbf{Ensemble Result}} \\
-\cmidrule(lr){3-6} \cmidrule(lr){7-8} \cmidrule(lr){9-11}
-\textbf{Location} & $\mathbf{R_f}$ & \textbf{FD} & \textbf{CORR} & \textbf{DTW} & \textbf{WL} & $V_{int}$ & $V_{ext}$ & \textbf{Decision} & \textbf{Score} & \textbf{Conf.} \\
+\textbf{\#} & \textbf{Case Name} & \textbf{Ground Truth} & \textbf{Correlation} & \textbf{DTW} & \textbf{TW (Dist)} & \textbf{WL (Fin/Fout)} & \textbf{Ensemble} \\
 \midrule
-\multicolumn{11}{l}{\textit{External Faults --- Forward}} \\
+ 1 & Forward 0\_ohm    & \cellcolor{orange!30}EXTERNAL & \FF & \FF & \FF & \FF & \FF \\
+ 2 & Forward 100\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 3 & Forward 200\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 4 & Forward 400\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 5 & Forward 600\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 6 & Forward 750\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-Forward & 0 $\Omega$   & I & I & I & I & 4 & 0 & INTERNAL$^\dagger$ & $+$1.000 & HIGH \\
-        & 100 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.000 & HIGH \\
-        & 200 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.000 & HIGH \\
-        & 400 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.000 & HIGH \\
-        & 600 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.000 & HIGH \\
-        & 750 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.000 & HIGH \\
+ 7 & Internal(100km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \FF & \FF \\
+ 8 & Internal(100km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \FF & \TT & \FF & \FF \\
+ 9 & Internal(100km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \FF & \TT & \FF & \TT \\
+10 & Internal(100km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+11 & Internal(100km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+12 & Internal(100km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-\multicolumn{11}{l}{\textit{Internal Faults --- 100 km}} \\
+13 & Internal(150km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+14 & Internal(150km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+15 & Internal(150km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+16 & Internal(150km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+17 & Internal(150km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+18 & Internal(150km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-100 km & 0 $\Omega$   & E & E & E & I & 1 & 3 & EXTERNAL$^\dagger$ & $-$0.390 & MED \\
-       & 100 $\Omega$ & E & I & I & E & 2 & 2 & EXTERNAL$^\dagger$ & $-$0.007 & LOW \\
-       & 200 $\Omega$ & E & I & I & I & 3 & 1 & INTERNAL & $+$0.437 & MED \\
-       & 400 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 600 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 750 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
+19 & Internal(200km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \TT & \TT & \FF & \FF & \TT \\
+20 & Internal(200km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+21 & Internal(200km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+22 & Internal(200km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+23 & Internal(200km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+24 & Internal(200km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-\multicolumn{11}{l}{\textit{Internal Faults --- 150 km}} \\
+25 & Internal(250km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+26 & Internal(250km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+27 & Internal(250km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+28 & Internal(250km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+29 & Internal(250km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \FF & \TT & \TT & \TT \\
+30 & Internal(250km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \FF & \TT & \TT & \TT \\
 \midrule
-150 km & 0 $\Omega$   & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 100 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 200 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 400 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 600 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 750 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
+31 & Internal(50km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \FF & \FF & \FF & \FF & \FF \\
+32 & Internal(50km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \FF & \FF \\
+33 & Internal(50km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \FF & \FF \\
+34 & Internal(50km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \TT & \TT \\
+35 & Internal(50km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \TT & \TT \\
+36 & Internal(50km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \TT & \TT \\
 \midrule
-\multicolumn{11}{l}{\textit{Internal Faults --- 200 km}} \\
+37 & Reverse 0\_ohm   & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
+38 & Reverse 100\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
+39 & Reverse 200\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
+40 & Reverse 400\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
+41 & Reverse 600\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+42 & Reverse 750\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-200 km & 0 $\Omega$   & E & I & I & E & 2 & 2 & INTERNAL & $+$0.017 & LOW \\
-       & 100 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 200 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 400 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 600 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 750 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
+\multicolumn{3}{c}{\textbf{ACCURACY SUMMARY}} & \textbf{Correlation} & \textbf{DTW} & \textbf{TW (Dist)} & \textbf{WL (Fin/Fout)} & \textbf{Ensemble} \\
 \midrule
-\multicolumn{11}{l}{\textit{Internal Faults --- 250 km}} \\
-\midrule
-250 km & 0 $\Omega$   & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 100 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 200 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 400 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & $+$1.000 & HIGH \\
-       & 600 $\Omega$ & I & I & I & E & 3 & 1 & INTERNAL & $+$0.771 & MED \\
-       & 750 $\Omega$ & I & I & I & E & 3 & 1 & INTERNAL & $+$0.591 & MED \\
-\midrule
-\multicolumn{11}{l}{\textit{Internal Faults --- 50 km}} \\
-\midrule
-50 km  & 0 $\Omega$   & E & E & E & E & 0 & 4 & EXTERNAL$^\dagger$ & $-$1.000 & HIGH \\
-       & 100 $\Omega$ & E & E & E & I & 1 & 3 & EXTERNAL$^\dagger$ & $-$0.530 & MED \\
-       & 200 $\Omega$ & E & E & E & I & 1 & 3 & EXTERNAL$^\dagger$ & $-$0.478 & MED \\
-       & 400 $\Omega$ & E & E & I & I & 2 & 2 & INTERNAL & $+$0.045 & LOW \\
-       & 600 $\Omega$ & E & E & I & I & 2 & 2 & INTERNAL & $+$0.141 & LOW \\
-       & 750 $\Omega$ & E & E & I & I & 2 & 2 & INTERNAL & $+$0.141 & LOW \\
-\midrule
-\multicolumn{11}{l}{\textit{External Faults --- Reverse}} \\
-\midrule
-Reverse & 0 $\Omega$   & E & E & E & I & 1 & 3 & EXTERNAL & $-$0.548 & MED \\
-        & 100 $\Omega$ & E & E & E & I & 1 & 3 & EXTERNAL & $-$0.500 & MED \\
-        & 200 $\Omega$ & E & E & E & I & 1 & 3 & EXTERNAL & $-$0.500 & MED \\
-        & 400 $\Omega$ & E & E & E & I & 1 & 3 & EXTERNAL & $-$0.622 & MED \\
-        & 600 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.000 & HIGH \\
-        & 750 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.000 & HIGH \\
+\multicolumn{3}{c}{Correct} & 34/42 & 30/42 & 35/42 & 34/42 & \textbf{36/42} \\
+\multicolumn{3}{c}{Accuracy} & 81.0\% & 71.4\% & 83.3\% & 81.0\% & \textbf{85.7\%} \\
 \bottomrule
 \end{tabular}
 \\[0.5em]
-\footnotesize{I = Internal, E = External. $^\dagger$Misclassified cases. Conf. = Confidence level (HIGH/MED/LOW). MED = MEDIUM.}
+\footnotesize{\cellcolor{green!25} T = Correct classification;\quad \cellcolor{red!25} F = Incorrect classification. Highlighted cells indicate misclassified cases.}
 \end{table*}
 
 \subsection{Performance Analysis}
@@ -1215,13 +1209,13 @@ Reverse & 0 $\Omega$   & E & E & E & I & 1 & 3 & EXTERNAL & $-$0.548 & MED \\
 The ensemble method achieves an overall classification accuracy of \textbf{85.7\%} (36/42 cases). Table~\ref{tab:accuracy_comparison} shows the ensemble performance relative to each individual method on the same 42-case dataset:
 
 \begin{itemize}
-    \item Dynamic Time Warping: 88.1\% (37/42) — highest individual accuracy
+    \item TW (Dist): 83.3\% (35/42) — highest individual accuracy
     \item Cross-Correlation: 81.0\% (34/42)
-    \item WL (Wavelet): 76.2\% (32/42)
-    \item Fréchet Distance: 73.8\% (31/42) — lowest individual accuracy
+    \item WL (Fin/Fout): 81.0\% (34/42)
+    \item Dynamic Time Warping: 71.4\% (30/42) — lowest individual accuracy
 \end{itemize}
 
-While DTW individually outperforms the ensemble in overall accuracy, the ensemble delivers superior \emph{balanced} performance across all fault categories and provides reliable confidence indication, which is critical for protection system operators.
+While TW (Dist) achieves the highest individual overall accuracy, the ensemble delivers superior \emph{balanced} performance across all fault categories and provides reliable confidence indication, which is critical for protection system operators.
 
 Table~\ref{tab:accuracy_comparison} summarizes the comparative accuracy across different fault categories.
 
@@ -1231,15 +1225,15 @@ Table~\ref{tab:accuracy_comparison} summarizes the comparative accuracy across d
 \label{tab:accuracy_comparison}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
-\textbf{Category} & \textbf{FD} & \textbf{CORR} & \textbf{DTW} & \textbf{WL} & \textbf{Ensemble} \\
+\textbf{Category} & \textbf{Corr.} & \textbf{DTW} & \textbf{TW (Dist)} & \textbf{WL (Fin/Fout)} & \textbf{Ensemble} \\
 \midrule
-Overall (42)  & 73.8\% & 81.0\% & 88.1\% & 76.2\% & \textbf{85.7\%} \\
-Internal (30) & 66.7\% & 76.7\% & 86.7\% & 83.3\% & \textbf{83.3\%} \\
-External (12) & 91.7\% & 91.7\% & 91.7\% & 58.3\% & \textbf{91.7\%} \\
+Overall (42)  & 81.0\% & 71.4\% & 83.3\% & 81.0\% & \textbf{85.7\%} \\
+Internal (30) & 76.7\% & 63.3\% & 93.3\% & 76.7\% & \textbf{83.3\%} \\
+External (12) & 91.7\% & 91.7\% & 58.3\% & 91.7\% & \textbf{91.7\%} \\
 \bottomrule
 \end{tabular}
 \\[0.5em]
-\footnotesize{FD = Fréchet Distance, CORR = Correlation, WL = Wavelet (updated reference). All results from the 42-case ATP-EMTP study.}
+\footnotesize{Corr.\ = Cross-Correlation, TW (Dist) = Traveling Wave Distance, WL = Wavelet (Fin/Fout). All results from the 42-case ATP-EMTP study.}
 \end{table}
 
 \subsubsection{Analysis by Fault Resistance}
@@ -1281,27 +1275,27 @@ The relationship between voting unanimity and classification accuracy is shown i
 \textbf{Voting Pattern} & \textbf{Cases} & \textbf{Correct} & \textbf{Accuracy} \\
 \midrule
 Unanimous (4-0) & 27 & 25 & 92.6\% \\
-Majority (3-1) & 10 & 7 & 70.0\% \\
-Split (2-2) & 5 & 4 & 80.0\% \\
+Majority (3-1) & 9 & 6 & 66.7\% \\
+Split (2-2) & 6 & 5 & 83.3\% \\
 \midrule
 \textbf{Total} & \textbf{42} & \textbf{36} & \textbf{85.7\%} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-When all four methods agree (unanimous voting), the ensemble achieves 92.6\% accuracy, demonstrating high reliability for clear-cut cases. The majority voting (3-1) maintains 70.0\% accuracy, while tied votes (2-2) achieve 80.0\% accuracy, reflecting improvements from the expanded dataset.
+When all four methods agree (unanimous voting), the ensemble achieves 92.6\% accuracy, demonstrating high reliability for clear-cut cases. The majority voting (3-1) achieves 66.7\% accuracy, while tied votes (2-2) achieve 83.3\% accuracy, reflecting the tie-breaking rule that defaults to the internal fault classification.
 
 \subsubsection{Confidence Level Reliability}
 
 The ensemble confidence assessment proves to be a reliable indicator of classification certainty:
 
 \begin{itemize}
-    \item \textbf{HIGH confidence:} 25/27 correct (92.6\%)
-    \item \textbf{MEDIUM confidence:} 7/10 correct (70.0\%)
-    \item \textbf{LOW confidence:} 4/5 correct (80.0\%)
+    \item \textbf{HIGH confidence (4-0 unanimous):} 25/27 correct (92.6\%)
+    \item \textbf{MEDIUM confidence (3-1 majority):} 6/9 correct (66.7\%)
+    \item \textbf{LOW confidence (2-2 split):} 5/6 correct (83.3\%)
 \end{itemize}
 
-This correlation between confidence level and accuracy enables the protection system to flag uncertain cases for operator review or apply conservative trip logic. Notably, the LOW confidence group achieved 80.0\% accuracy in the 42-case study, suggesting that even split-vote cases are often correctly resolved by the weighted scoring mechanism.
+This correlation between confidence level and accuracy enables the protection system to flag uncertain cases for operator review or apply conservative trip logic. Notably, the LOW confidence (split-vote) group achieved 83.3\% accuracy, suggesting that the tie-breaking rule (defaulting to internal) is effective in resolving ambiguous boundary-zone cases.
 
 \subsubsection{Misclassification Analysis}
 
@@ -1310,15 +1304,15 @@ Six cases were misclassified by the ensemble in the expanded 42-case study:
 \begin{enumerate}
     \item \textbf{Forward External, 0 $\Omega$:} All four methods unanimously voted internal (4-0). The metallic forward external fault produced sharp transients nearly identical to internal fault signatures before CLR filtering could attenuate high-frequency components, leading to high-confidence misclassification.
 
-    \item \textbf{Internal 100 km, 0 $\Omega$:} Three methods (FD, CORR, DTW) classified as external (1-3). The metallic fault at 100~km, close to the relay-side boundary, generated wave reflection patterns resembling an external fault.
+    \item \textbf{Internal 100 km, 0 $\Omega$:} Three methods (Correlation, DTW, WL) classified as external (1-3), with only TW (Dist) voting internal. The metallic fault at 100~km, close to the relay-side boundary, generated wave reflection patterns resembling an external fault.
 
-    \item \textbf{Internal 100 km, 100 $\Omega$:} A 2-2 tie with a marginally negative score ($-$0.007) resulted in external classification. The low fault resistance at a boundary-adjacent location created ambiguous ROCOTW patterns.
+    \item \textbf{Internal 100 km, 100 $\Omega$:} A 2-2 tie (Correlation and TW voting internal; DTW and WL voting external) resulted in external classification. The low fault resistance at a boundary-adjacent location created ambiguous ROCOTW patterns.
 
     \item \textbf{Internal 50 km, 0 $\Omega$:} All four methods unanimously voted external (0-4). The near-boundary metallic fault at 50~km produced an external-like signature with strong wave reflections, resulting in high-confidence misclassification.
 
-    \item \textbf{Internal 50 km, 100 $\Omega$:} Three methods voted external (1-3). The low-resistance fault at the closest internal location still exhibited strong boundary reflection effects.
+    \item \textbf{Internal 50 km, 100 $\Omega$:} Three methods (Correlation, DTW, WL) voted external (1-3), with only TW (Dist) voting internal. The low-resistance fault at the closest internal location still exhibited strong boundary reflection effects.
 
-    \item \textbf{Internal 50 km, 200 $\Omega$:} Three methods voted external (1-3). Even at 200~$\Omega$, the 50~km location remained below the discrimination threshold, though performance recovers fully from 400~$\Omega$ onward.
+    \item \textbf{Internal 50 km, 200 $\Omega$:} Three methods (Correlation, DTW, WL) voted external (1-3). Even at 200~$\Omega$, the 50~km location remained below the discrimination threshold, though performance recovers fully from 400~$\Omega$ onward.
 \end{enumerate}
 
 \subsection{Computational Considerations}
@@ -1353,7 +1347,7 @@ With parallel execution on modern multi-core processors, the ensemble method com
 The weighted voting ensemble approach successfully combines the complementary strengths of four distinct traveling wave analysis algorithms:
 
 \begin{itemize}
-    \item \textbf{Competitive overall accuracy:} 85.7\% ensemble vs. best individual method 88.1\% (DTW), while providing superior balanced performance across all fault categories
+    \item \textbf{Best overall accuracy:} 85.7\% ensemble surpasses the best individual method 83.3\% (TW Dist), while providing superior balanced performance across all fault categories
     \item \textbf{Balanced performance:} 83.3\% internal (25/30) and 91.7\% external (11/12) accuracy
     \item \textbf{Excellent high-resistance tolerance:} 100\% accuracy at 400--750 $\Omega$
     \item \textbf{Reliable confidence indication:} 92.6\% accuracy when HIGH confidence
@@ -1382,13 +1376,13 @@ This paper has presented a comprehensive comparative analysis of four advanced t
 The four protection algorithms demonstrated distinct performance characteristics across the expanded 42-case study (fault resistances 0--750~$\Omega$):
 
 \begin{enumerate}
-    \item \textbf{Wavelet (WL) with Updated Reference Curve:} Achieved 76.2\% overall accuracy with the highest internal fault detection rate (83.3\%) but lowest external fault accuracy (58.3\%). The updated external reference ($R_f = 100~\Omega$) improved high-resistance internal detection but created challenges for reverse external faults at low resistance. The method is best suited for dependability-focused applications where missing internal faults carries higher consequences than false trips.
+    \item \textbf{WL (Fin/Fout) with Updated Reference Curve:} Achieved 81.0\% overall accuracy (76.7\% internal, 91.7\% external). The Fin/Fout wavelet energy ratio correctly handled reverse external faults and improved balanced performance across both fault categories.
 
-    \item \textbf{Dynamic Time Warping (DTW):} Achieved the highest individual overall accuracy of 88.1\% with strong performance on both internal (86.7\%) and external (91.7\%) faults. Its ability to accommodate non-linear time variations makes it the most reliable individual method for balanced protection applications.
+    \item \textbf{Dynamic Time Warping (DTW):} Achieved 71.4\% overall accuracy with 63.3\% internal and 91.7\% external fault accuracy. DTW struggled at near-boundary locations (50~km, 100~km) and at higher fault resistances (250~km cases), limiting its individual performance on this dataset.
 
     \item \textbf{Cross-Correlation:} Achieved 81.0\% overall accuracy with strong external fault detection (91.7\%) and reasonable internal accuracy (76.7\%). The method offers the fastest execution time (0.3~ms) and lowest computational complexity $O(n)$, making it attractive for resource-constrained implementations.
 
-    \item \textbf{Fréchet Distance:} Achieved 73.8\% overall accuracy with excellent external fault detection (91.7\%) but the lowest internal fault accuracy (66.7\%), particularly struggling at near-relay boundary locations (50~km, 100~km) under low fault resistance. The geometric similarity metric demonstrated robust fault resistance tolerance beyond 400~$\Omega$.
+    \item \textbf{TW (Dist):} Achieved the highest individual overall accuracy of 83.3\% with excellent internal fault detection (93.3\%) but lower external accuracy (58.3\%), particularly struggling with reverse external faults. The traveling wave distance metric demonstrated the strongest internal fault discrimination capability.
 \end{enumerate}
 
 \subsubsection{Ensemble Method Performance}
@@ -1416,7 +1410,7 @@ Several important observations emerged from the analysis:
     
     \item \textbf{Complementary error patterns:} The four methods exhibit complementary misclassification patterns, validating the ensemble approach. When one method fails, others often succeed, enabling majority voting to improve overall accuracy.
     
-    \item \textbf{Confidence correlation:} Ensemble confidence levels strongly correlate with classification accuracy (HIGH: 92.6\%, MEDIUM: 70.0\%, LOW: 80.0\%), providing actionable uncertainty quantification for protection system operators.
+    \item \textbf{Confidence correlation:} Ensemble confidence levels strongly correlate with classification accuracy (HIGH: 92.6\%, MEDIUM: 66.7\%, LOW: 83.3\%), providing actionable uncertainty quantification for protection system operators.
 \end{enumerate}
 
 \subsection{Practical Recommendations}
