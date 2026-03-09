@@ -15,9 +15,9 @@
 \usepackage[all]{hypcap}
 \hypersetup{hidelinks}
 
-% Color helpers for T/F cells in tables
-\newcommand{\TT}{\cellcolor{green!25}T}
-\newcommand{\FF}{\cellcolor{red!25}F}
+% T/F result indicators for tables
+\newcommand{\TT}{T}
+\newcommand{\FF}{F}
 
 % Correct hyphenation
 \hyphenation{op-tical net-works semi-conduc-tor}
@@ -455,7 +455,27 @@ These fundamental differences enable the four protection algorithms to distingui
     \item \textbf{Fréchet Distance:} Evaluates geometric similarity of ROCOTW curves
 \end{itemize}
 
-The next section presents detailed descriptions of these four algorithms and their implementation.
+\subsection{ATP-EMTP Simulation Procedure}
+
+All 42 fault scenarios are executed in ATP-EMTP and post-processed in Python. The workflow is structured as follows:
+
+\begin{enumerate}
+    \item \textbf{Model setup:} A single ATP file encodes the bipolar MMC-HVDC system described in this section. Fault switches are embedded at each 50~km segment junction and at the forward/reverse external fault buses, controlled via TACS logic.
+
+    \item \textbf{Parameter sweep:} Each run activates one fault switch and sets the fault resistance $R_f \in \{0, 100, 200, 400, 600, 750\}$~$\Omega$. Internal faults are placed at 50, 100, 150, 200, and 250~km from the relay; forward external faults are placed beyond MMC1's CLR; reverse external faults originate behind the relay at the MMC1 terminal bus.
+
+    \item \textbf{Data export:} Positive- and negative-pole voltages and currents at relay point M are saved at 100~kHz. The ATP \texttt{.pl4} output files are converted to NumPy arrays using the \texttt{atp-reader} utility.
+
+    \item \textbf{Mode decomposition:} The Kellenberger transformation (Eq.~\eqref{eq:clarke_transform}) is applied in Python to obtain the line-mode backward traveling wave $U_{b1}(t)$.
+
+    \item \textbf{ROCOTW extraction:} The Savitzky-Golay derivative filter is applied to $U_{b1}(t)$ with window $w = 11$, polynomial order $p = 3$ to obtain the smoothed ROCOTW signal fed to all four algorithms.
+
+    \item \textbf{Reference templates:} The internal reference is extracted from the metallic PGF run at 150~km. The external reference for DTW, Cross-Correlation, and Fréchet Distance is extracted from the forward fault run at $R_f = 0~\Omega$; for the WL method a forward fault at $R_f = 100~\Omega$ is used to avoid the atypical near-zero wavefront of metallic external faults.
+
+    \item \textbf{Classification and scoring:} Each algorithm processes all 42 ROCOTW records and outputs INTERNAL/EXTERNAL decisions. Accuracy is computed against the known ground truth of each run.
+\end{enumerate}
+
+The next section presents the mathematical formulation and results of each algorithm.
 
 % Section III - Protection Algorithm Descriptions
 % Section III - Protection Algorithm Descriptions
@@ -662,10 +682,12 @@ For a measured ROCOTW pattern, DTW distances to both references are computed, an
 \item External reference: Forward fault with $R_f = 0~\Omega$
 \end{itemize}
 
+\noindent\textbf{Note:} The same two normalized ROCOTW reference curves defined above (internal: metallic PGF at 150~km; external: forward fault, $R_f = 0~\Omega$) are reused without modification by the Cross-Correlation and Fréchet Distance algorithms described in Sections~\ref{sec:corr} and \ref{sec:fd}, respectively.
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\columnwidth]{DYNAMIC_TIME_WARPING.png}
-    \caption{Normalized ROCOTW reference curves used for DTW, Cross-Correlation, and Fréchet Distance analysis. The internal reference (green) shows a broad sustained profile, while the external reference (red) exhibits a pronounced secondary oscillation due to wave reflections at the protection zone boundary.}
+    \caption{Normalized ROCOTW reference curves (shared by DTW, Cross-Correlation, and Fréchet Distance). The internal reference shows a broad sustained profile; the external reference exhibits a pronounced secondary oscillation due to wave reflections at the CLR boundary.}
     \label{fig:reference_curves}
 \end{figure}
 
@@ -674,6 +696,7 @@ For a measured ROCOTW pattern, DTW distances to both references are computed, an
 % ============================================================================
 
 \subsection{Algorithm 3: Cross-Correlation Coefficient Analysis}
+\label{sec:corr}
 
 \subsubsection{Mathematical Foundation}
 
@@ -708,11 +731,8 @@ Classification is based on maximum correlation:
 \begin{itemize}
 \item Input: Normalized ROCOTW from 1.0 ms post-fault window
 \item Correlation type: Zero-lag normalized cross-correlation
-\item Internal reference: Metallic PGF at 150 km
-\item External reference: Forward fault with $R_f = 0~\Omega$
+\item Reference curves: Same normalized templates as Algorithm~2 (Fig.~\ref{fig:reference_curves})
 \end{itemize}
-
-The same ROCOTW reference curves shown in Fig.~\ref{fig:reference_curves} are used as templates for zero-lag cross-correlation classification, with the internal reference (green) and external reference (red) illustrating the distinct morphological signatures.
 
 % ============================================================================
 % Algorithm 4 - Fréchet Distance of ROCOTW Curves
@@ -729,6 +749,7 @@ The same ROCOTW reference curves shown in Fig.~\ref{fig:reference_curves} are us
 % ============================================================================
 
 \subsection{Algorithm 4: Fréchet Distance-Based ROCOTW Classification}
+\label{sec:fd}
 
 The Fréchet distance provides a robust metric for comparing traveling wave signatures by accounting for both shape similarity and temporal ordering \cite{eiter1994, reference_paper_frechet}. Unlike point-wise distance measures, the Fréchet distance captures the overall geometric correspondence between curves, making it particularly suitable for fault classification where waveform morphology is the discriminating feature.
 
@@ -754,17 +775,9 @@ F(\mathbf{P}, \mathbf{Q}) = C(n, m)
 
 This formulation ensures that the computed distance reflects the minimum "leash length" required to simultaneously traverse both curves from start to end, respecting their temporal ordering.
 
-\subsubsection{Reference Curve Establishment}
+\subsubsection{Reference Curves}
 
-Two reference ROCOTW signatures are established from representative fault cases to serve as classification templates:
-
-\begin{itemize}
-    \item \textbf{Internal reference} $(\mathbf{P}_{int}^{ref})$: Derived from a metallic pole-to-ground fault at 150 km, representing the characteristic internal fault signature with sustained high-amplitude oscillations.
-    \item \textbf{External reference} $(\mathbf{P}_{ext}^{ref})$: Derived from a forward external fault with $R_f = 0~\Omega$, exhibiting the typical rapid decay pattern of external disturbances.
-\end{itemize}
-
-Fig.~\ref{fig:reference_curves} illustrates the normalized reference curves, highlighting the distinct morphological differences between internal and external fault signatures. The internal reference exhibits a broader profile with sustained amplitude, while the external reference demonstrates rapid attenuation characteristic of reflected traveling waves at the protection zone boundary.
-
+The Fréchet distance method uses the same normalized ROCOTW reference curves established in Algorithm~2 (Fig.~\ref{fig:reference_curves}): an internal reference $(\mathbf{P}_{int}^{ref})$ from a metallic pole-to-ground fault at 150~km, and an external reference $(\mathbf{P}_{ext}^{ref})$ from a forward fault with $R_f = 0~\Omega$.
 
 \subsubsection{Signal Processing Pipeline}
 
@@ -1131,54 +1144,54 @@ The ensemble method was evaluated on the same 42 fault scenarios used for indivi
 \toprule
 \textbf{\#} & \textbf{Case Name} & \textbf{Ground Truth} & \textbf{Correlation} & \textbf{DTW} & \textbf{TW (Dist)} & \textbf{WL (Fin/Fout)} & \textbf{Ensemble} \\
 \midrule
- 1 & Forward 0\_ohm    & \cellcolor{orange!30}EXTERNAL & \FF & \FF & \FF & \FF & \FF \\
- 2 & Forward 100\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
- 3 & Forward 200\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
- 4 & Forward 400\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
- 5 & Forward 600\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
- 6 & Forward 750\_ohm  & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 1 & Forward 0\_ohm    & EXTERNAL & \FF & \FF & \FF & \FF & \FF \\
+ 2 & Forward 100\_ohm  & EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 3 & Forward 200\_ohm  & EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 4 & Forward 400\_ohm  & EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 5 & Forward 600\_ohm  & EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 6 & Forward 750\_ohm  & EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
- 7 & Internal(100km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \FF & \FF \\
- 8 & Internal(100km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \FF & \TT & \FF & \FF \\
- 9 & Internal(100km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \FF & \TT & \FF & \TT \\
-10 & Internal(100km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-11 & Internal(100km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-12 & Internal(100km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+ 7 & Internal(100km) 0\_ohm   & INTERNAL & \FF & \FF & \TT & \FF & \FF \\
+ 8 & Internal(100km) 100\_ohm & INTERNAL & \TT & \FF & \TT & \FF & \FF \\
+ 9 & Internal(100km) 200\_ohm & INTERNAL & \TT & \FF & \TT & \FF & \TT \\
+10 & Internal(100km) 400\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+11 & Internal(100km) 600\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+12 & Internal(100km) 750\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-13 & Internal(150km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-14 & Internal(150km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-15 & Internal(150km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-16 & Internal(150km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-17 & Internal(150km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-18 & Internal(150km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+13 & Internal(150km) 0\_ohm   & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+14 & Internal(150km) 100\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+15 & Internal(150km) 200\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+16 & Internal(150km) 400\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+17 & Internal(150km) 600\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+18 & Internal(150km) 750\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-19 & Internal(200km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \TT & \TT & \FF & \FF & \TT \\
-20 & Internal(200km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-21 & Internal(200km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-22 & Internal(200km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-23 & Internal(200km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-24 & Internal(200km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+19 & Internal(200km) 0\_ohm   & INTERNAL & \TT & \TT & \FF & \FF & \TT \\
+20 & Internal(200km) 100\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+21 & Internal(200km) 200\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+22 & Internal(200km) 400\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+23 & Internal(200km) 600\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+24 & Internal(200km) 750\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-25 & Internal(250km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-26 & Internal(250km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-27 & Internal(250km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-28 & Internal(250km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \TT & \TT & \TT & \TT \\
-29 & Internal(250km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \FF & \TT & \TT & \TT \\
-30 & Internal(250km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \TT & \FF & \TT & \TT & \TT \\
+25 & Internal(250km) 0\_ohm   & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+26 & Internal(250km) 100\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+27 & Internal(250km) 200\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+28 & Internal(250km) 400\_ohm & INTERNAL & \TT & \TT & \TT & \TT & \TT \\
+29 & Internal(250km) 600\_ohm & INTERNAL & \TT & \FF & \TT & \TT & \TT \\
+30 & Internal(250km) 750\_ohm & INTERNAL & \TT & \FF & \TT & \TT & \TT \\
 \midrule
-31 & Internal(50km) 0\_ohm   & \cellcolor{blue!20}INTERNAL & \FF & \FF & \FF & \FF & \FF \\
-32 & Internal(50km) 100\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \FF & \FF \\
-33 & Internal(50km) 200\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \FF & \FF \\
-34 & Internal(50km) 400\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \TT & \TT \\
-35 & Internal(50km) 600\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \TT & \TT \\
-36 & Internal(50km) 750\_ohm & \cellcolor{blue!20}INTERNAL & \FF & \FF & \TT & \TT & \TT \\
+31 & Internal(50km) 0\_ohm   & INTERNAL & \FF & \FF & \FF & \FF & \FF \\
+32 & Internal(50km) 100\_ohm & INTERNAL & \FF & \FF & \TT & \FF & \FF \\
+33 & Internal(50km) 200\_ohm & INTERNAL & \FF & \FF & \TT & \FF & \FF \\
+34 & Internal(50km) 400\_ohm & INTERNAL & \FF & \FF & \TT & \TT & \TT \\
+35 & Internal(50km) 600\_ohm & INTERNAL & \FF & \FF & \TT & \TT & \TT \\
+36 & Internal(50km) 750\_ohm & INTERNAL & \FF & \FF & \TT & \TT & \TT \\
 \midrule
-37 & Reverse 0\_ohm   & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
-38 & Reverse 100\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
-39 & Reverse 200\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
-40 & Reverse 400\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
-41 & Reverse 600\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
-42 & Reverse 750\_ohm & \cellcolor{orange!30}EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+37 & Reverse 0\_ohm   & EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
+38 & Reverse 100\_ohm & EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
+39 & Reverse 200\_ohm & EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
+40 & Reverse 400\_ohm & EXTERNAL & \TT & \TT & \FF & \TT & \TT \\
+41 & Reverse 600\_ohm & EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
+42 & Reverse 750\_ohm & EXTERNAL & \TT & \TT & \TT & \TT & \TT \\
 \midrule
 \multicolumn{3}{c}{\textbf{ACCURACY SUMMARY}} & \textbf{Correlation} & \textbf{DTW} & \textbf{TW (Dist)} & \textbf{WL (Fin/Fout)} & \textbf{Ensemble} \\
 \midrule
@@ -1187,7 +1200,7 @@ The ensemble method was evaluated on the same 42 fault scenarios used for indivi
 \bottomrule
 \end{tabular}
 \\[0.5em]
-\footnotesize{\colorbox{green!25}{T} = Correct classification;\quad \colorbox{red!25}{F} = Incorrect classification. Highlighted cells indicate misclassified cases.}
+\footnotesize{T = Correct classification;\quad F = Incorrect classification.}
 \end{table*}
 
 \subsection{Performance Analysis}
