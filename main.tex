@@ -1,0 +1,1435 @@
+\documentclass[journal]{IEEEtran}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% Correct hyphenation
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+
+% Paper title - CORRECTED: Improved formatting and naming
+\title{Comparative Study of Pattern Matching Algorithms for Traveling Wave Protection in MMC-HVDC Transmission Systems}
+
+% Author names and affiliations
+\author{Yahya Khaled$^{1}$ and Akram Ibrahim$^{1}$
+\thanks{$^{1}$Department of Electrical Engineering, Mansoura University, Egypt}%
+}
+
+% Make the title area
+\maketitle
+
+
+\begin{abstract}
+High Voltage Direct Current (HVDC) transmission systems require rapid and reliable fault detection mechanisms to ensure system stability and prevent cascading failures. Traveling wave (TW)-based protection schemes have emerged as promising solutions due to their inherent speed advantages. However, the comparative performance of different TW-based algorithms under varying fault conditions remains inadequately characterized. This paper presents a comprehensive evaluation of four advanced TW protection methods for MMC-HVDC transmission lines: Discrete Wavelet Transform (DWT) energy distribution analysis, Dynamic Time Warping (DTW) distance metric, Cross-Correlation pattern matching, and Fréchet Distance of Rate of Change of Traveling Waves (ROCOTW). Additionally, a novel weighted voting ensemble approach that synergistically combines all four methods is proposed. Through systematic ATP-EMTP simulations of a 300~km, $\pm$500~kV bipolar HVDC system, each algorithm is evaluated across 42 fault scenarios including internal faults at five locations (50--250~km) and external faults (forward and reverse) with fault resistances from 0~$\Omega$ to 750~$\Omega$. Results demonstrate that the proposed ensemble method achieves an overall accuracy of 85.7\% (36/42 cases), with 100\% accuracy for fault resistances of 400--750~$\Omega$ and 92.9\% accuracy when reporting HIGH confidence. All methods operate within the critical 2--3~ms decision window required for HVDC protection. The study provides practical recommendations for algorithm selection based on application requirements, with the ensemble approach recommended for systems requiring balanced dependability and security performance.
+\end{abstract}
+
+% Keywords
+\begin{IEEEkeywords}
+HVDC transmission, fault protection, traveling wave, discrete wavelet transform, dynamic time warping, cross-correlation, Fréchet distance, comparative analysis, pattern matching.
+\end{IEEEkeywords}
+
+% Introduction
+\section{Introduction}
+
+\IEEEPARstart{F}{lexible} High Voltage Direct Current (HVDC) transmission technology based on Modular Multilevel Converters (MMC) has become increasingly critical for modern power systems, enabling efficient long-distance bulk power transmission, integration of renewable energy, and interconnection of asynchronous networks \cite{reference_paper_frechet}. The advantages of MMC-HVDC systems include bidirectional power flow capability, low harmonic distortion, black-start capability, and the absence of commutation failure issues characteristic of conventional line-commutated converter (LCC) HVDC systems. However, these advantages come with significant protection challenges.
+
+Unlike traditional AC systems or conventional thyristor-based line-commutated converter (LCC) HVDC systems, MMC-HVDC grids exhibit unique fault characteristics that complicate protection design. When a DC fault occurs, the small damping and low impedance of DC networks result in extremely rapid fault current rise rates (typically $di/dt > 10$ kA/ms), with peak currents reaching several tens of kiloamperes within milliseconds. The submodule capacitors in MMC stations rapidly discharge into the fault location, contributing to the fault current even after converter blocking. These characteristics demand ultra-fast fault detection and isolation mechanisms, typically requiring operation within 2-3 ms to prevent equipment damage and maintain system stability \cite{reference1, reference2}.
+
+
+
+\subsection{Background and Motivation}
+
+Traveling wave (TW) based protection schemes have emerged as the predominant solution for HVDC transmission line protection due to their inherent speed advantages. Commercial protection systems from ABB and Siemens utilize TW derivatives (du/dt or dP/dt) as primary fault indicators \cite{reference3}. However, these conventional approaches face several critical limitations:
+
+\begin{itemize}
+    \item \textbf{Limited fault resistance tolerance:} Derivative-based methods sacrifice sensitivity to high-resistance faults to maintain selectivity, resulting in protection blind zones for internal faults with resistance exceeding 300-400 $\Omega$.
+    
+    \item \textbf{Incomplete information utilization:} Simple threshold-based schemes using only magnitude information fail to exploit the rich temporal and spectral characteristics embedded in traveling wave signatures.
+    
+    \item \textbf{Boundary condition sensitivity:} Performance degradation occurs under weak boundary conditions (small current-limiting reactor values) where the distinction between internal and external fault signatures becomes less pronounced.
+    
+    \item \textbf{Noise susceptibility:} Electromagnetic interference and measurement noise can trigger false operations or desensitize protection relays, particularly in schemes relying on high-frequency components.
+\end{itemize}
+
+To address these limitations, researchers have proposed advanced signal processing techniques that analyze the complete waveform characteristics of traveling waves rather than simple magnitude thresholds. These methods can be broadly categorized into:
+
+\textbf{1) Frequency-domain methods:} Exploiting the frequency-selective attenuation of current-limiting reactors (CLRs) to distinguish fault types. While effective, these methods often suffer from high computational complexity and limited noise immunity.
+
+\textbf{2) Time-domain pattern analysis:} Utilizing the overall curve characteristics, distortion patterns, and temporal evolution of traveling waves. Recent advances include wavelet analysis, curve fitting, and similarity metrics.
+
+Despite these developments, a systematic comparative evaluation of these advanced methods under identical test conditions remains absent from the literature. Most existing studies focus on validating individual algorithms without providing direct performance comparisons, making it difficult for protection engineers to select appropriate methods for specific applications.
+
+\subsection{Literature Review}
+
+Recent research on HVDC protection can be categorized based on the signal processing approach employed:
+
+\textbf{Wavelet-based methods:} Discrete Wavelet Transform (DWT) has been widely applied for transient signal analysis in power systems. The multi-resolution analysis capability of wavelets enables simultaneous time-frequency localization, making it suitable for detecting abrupt changes in traveling waves. Studies have demonstrated that wavelet-based methods can effectively capture fault transient characteristics through energy distribution across decomposition levels \cite{wavelet1, wavelet2}. Energy-based approaches analyze the distribution of signal energy across detail coefficients at different scales, where internal faults exhibit concentrated high-frequency energy (dominant energy in fine-scale details D1-D2) due to sharp wavefronts, while external faults show energy shift toward coarser scales (D3-D4) due to current-limiting reactor filtering effects. Classification is performed by comparing the normalized energy distribution vector of the measured fault signal against reference patterns using Euclidean distance metrics. This energy-based approach offers computational efficiency and robustness to amplitude variations when combined with proper normalization.
+
+\textbf{Pattern matching approaches:} Dynamic Time Warping (DTW) and Fréchet distance have been recently introduced to HVDC protection. DTW calculates the optimal alignment between two temporal sequences, accommodating non-linear time variations and making it robust to wave propagation speed uncertainties \cite{dtw1}. The Fréchet distance method, as proposed in \cite{reference_paper_frechet}, measures the similarity between the Rate of Change of Traveling Wave (ROCOTW) curves, demonstrating excellent fault resistance tolerance up to 600 $\Omega$. These geometric similarity metrics offer intuitive physical interpretation and inherent normalization properties.
+
+\textbf{Correlation-based schemes:} Cross-correlation analysis provides a computationally efficient means of pattern matching, with established theoretical foundations in signal processing. Pearson correlation coefficients quantify the linear relationship between measured and reference waveforms, offering simplicity and fast execution. However, sensitivity to amplitude scaling and time-shift variations may limit performance in certain scenarios.
+
+\subsection{Research Gap and Contributions}
+
+Despite the proliferation of HVDC protection algorithms, critical knowledge gaps persist:
+
+\begin{enumerate}
+    \item \textbf{Lack of direct comparison:} Published studies typically validate individual methods without comparing against alternatives under identical conditions.
+    
+    \item \textbf{Incomplete performance characterization:} Many papers focus on specific aspects (e.g., fault resistance tolerance) while neglecting others (e.g., computational efficiency).
+    
+    \item \textbf{Limited practical guidance:} Protection engineers lack clear recommendations on which algorithm best suits specific system characteristics or operational requirements.
+    
+    \item \textbf{Insufficient robustness testing:} Many proposed schemes are validated under limited scenarios, with inadequate evaluation of edge cases and challenging conditions.
+\end{enumerate}
+
+This paper addresses these gaps through a comprehensive comparative study of four representative advanced TW protection algorithms. The main contributions are:
+
+\begin{itemize}
+    \item \textbf{Systematic comparative framework:} All four algorithms (DWT-Lipschitz, DTW, Cross-Correlation, Fréchet Distance) are implemented and tested on an identical ATP-EMTP simulation model, ensuring fair comparison.
+    
+    \item \textbf{Comprehensive performance evaluation:} Multiple metrics are assessed including classification accuracy, fault resistance tolerance, computational time, and sensitivity to system parameters.
+    
+    \item \textbf{Extensive test scenarios:} 28 comprehensive fault cases spanning various fault types (pole-to-ground), locations (50-250 km), resistances (0-600 $\Omega$), and system conditions, with detailed performance evaluation for each algorithm.
+
+    \item \textbf{Novel ensemble methodology:} A weighted voting ensemble approach that synergistically combines all four algorithms to achieve superior accuracy and robustness compared to individual methods.
+    
+    \item \textbf{Practical implementation insights:} Detailed analysis of trade-offs between accuracy, speed, and complexity, with specific recommendations for algorithm selection based on application requirements.
+    
+\end{itemize}
+
+\subsection{Paper Organization}
+
+The remainder of this paper is organized as follows: Section II presents the HVDC system model and traveling wave propagation theory, establishing the theoretical foundation for fault analysis. Section III describes the four protection algorithms in detail, including mathematical formulations, implementation procedures, and comprehensive experimental results for each method. Section IV presents a novel ensemble approach that combines all four algorithms using weighted voting to leverage their complementary strengths and achieve superior overall performance. Finally, Section V concludes the paper with key findings and recommendations for future research.
+
+% Section II - System Model and Traveling Wave Theory
+\section{HVDC System Model and Traveling Wave Propagation Theory}
+
+This section establishes the theoretical foundation for fault analysis in MMC-HVDC systems. The system model, traveling wave propagation characteristics, and fault behavior are presented to provide the basis for understanding how the four protection algorithms exploit different signal features.
+
+\subsection{MMC-HVDC System Configuration}
+
+The test system employed in this study is a symmetrical bipolar two-terminal MMC-HVDC transmission system, as illustrated in Fig. \ref{fig:hvdc_system} \cite{reference_paper_frechet}. The system specifications are:
+
+\begin{itemize}
+    \item Rated DC voltage: $\pm$500 kV
+    \item Transmission line length: 300 km (overhead line)
+    \item Converter stations: MMC1 (rectifier) and MMC2 (inverter)
+    \item Current-limiting reactors (CLRs): 100 mH at each terminal
+    \item System configuration: Symmetrical bipolar with metallic return
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\columnwidth]{hvdc_system_topology.pdf}
+\caption{MMC-HVDC system topology (adapted from \cite{reference_paper_frechet}).}
+\label{fig:hvdc_system}
+\end{figure}
+
+The protection relay M is located at the MMC1 terminal. Three representative fault locations are considered: $f_1$ (internal fault), $f_2$ (forward external fault), and $f_3$ (reverse external fault). All simulations are performed in ATP-EMTP, using a sampling frequency of 100 kHz to capture high-frequency traveling wave components.
+
+\subsection{MMC Station Equivalent Model}
+
+Each MMC station consists of six converter arms (three phases, upper and lower arms), with each arm containing N series-connected half-bridge submodules. For traveling wave analysis during the initial fault transient (before control system response), the MMC can be represented by an equivalent RLC circuit \cite{reference_paper_frechet}.
+
+The submodule capacitance equivalence is derived from energy conservation principles. Assuming identical submodule capacitor voltages $U_{sm}$ and capacitance $C_{sm}$, the total stored energy in one phase equals:
+
+\begin{equation}
+2N \times \frac{1}{2}C_{sm}U^2_{sm} = \frac{1}{2}C_{eq}(NU_{sm})^2
+\end{equation}
+
+which yields the equivalent phase capacitance:
+
+\begin{equation}
+C_{eq} = \frac{2C_{sm}}{N}
+\end{equation}
+
+For the three-phase MMC station, considering the parallel connection of phases under DC faults, the equivalent parameters are:
+
+\begin{equation}
+\begin{cases}
+R_{con} = 2R_{arm}/3 \\
+L_{con} = 2L_{arm}/3 \\
+C_{con} = 3C_{eq}
+\end{cases}
+\end{equation}
+
+where $R_{arm}$ and $L_{arm}$ are the equivalent resistance and inductance of each converter arm. The frequency-domain impedance of the MMC station is:
+
+\begin{equation}
+Z_M(s) = sL_{con} + R_{con} + \frac{1}{sC_{con}}
+\end{equation}
+
+This equivalent model accurately represents the MMC behavior during the first traveling wave arrival, which is the critical time window for all four protection algorithms.
+
+\subsection{DC Transmission Line Model}
+
+The DC overhead transmission line is modeled using the J. Marti frequency-dependent transmission line model \cite{marti1982accurate}, implemented in ATP-EMTP. This model accurately represents frequency-dependent effects including skin effect, ground return path variations, and distributed parameter behavior across a wide frequency range (0.001 Hz to 1 MHz).
+
+The 300 km transmission line is divided into six series-connected 50 km segments, with controllable switches at each junction to facilitate systematic fault testing at various locations (50 km, 100 km, 150 km, 200 km, and 250 km from the relay location).
+
+\subsubsection{Conductor Configuration}
+
+The bipolar HVDC line consists of two overhead conductors with the following specifications:
+\begin{itemize}
+    \item Conductor radius: 13.6 mm
+    \item Geometric mean radius (GMR): 3.12 mm  
+    \item Horizontal separation: 10 m ($\pm$5 m from centerline)
+    \item Average conductor height: 20 m above ground
+    \item Ground resistivity: 15 $\Omega\cdot$m
+\end{itemize}
+
+\subsubsection{Kellenberger Transformation and Mode Decomposition}
+
+Due to electromagnetic coupling between the positive and negative poles of the bipolar DC transmission line, analysis in the phase domain is complex. The Kellenberger (Clarke) transformation decouples the system into independent line-mode and zero-mode components:
+
+\begin{equation}
+\begin{bmatrix}
+X_0 \\ X_1
+\end{bmatrix}
+= \mathbf{T}
+\begin{bmatrix}
+X_p \\ X_n
+\end{bmatrix}
+= \frac{1}{\sqrt{2}}
+\begin{bmatrix}
+1 & 1 \\
+1 & -1
+\end{bmatrix}
+\begin{bmatrix}
+X_p \\ X_n
+\end{bmatrix}
+\label{eq:clarke_transform}
+\end{equation}
+
+\noindent where $X$ represents voltage or current, subscript $p$ denotes positive pole, $n$ denotes negative pole, 0 denotes zero-mode (common-mode), and 1 denotes line-mode (differential mode).
+
+The \textbf{line-mode component} ($X_1$) represents the differential voltage/current between poles and experiences minimal attenuation during propagation. The \textbf{zero-mode component} ($X_0$) involves ground return paths and suffers more severe attenuation. Therefore, subsequent fault analysis focuses primarily on the line-mode component for clearer fault signatures.
+
+\subsubsection{Frequency-Dependent Characteristics}
+
+The J. Marti model calculates frequency-dependent surge impedance automatically from the conductor geometry and ground parameters. The general frequency-dependent surge impedance is given by:
+
+\begin{equation}
+Z_C(f) = \sqrt{\frac{R_\ell(f) + j\omega L_\ell(f)}{G_\ell + j\omega C_\ell}}
+\label{eq:surge_impedance}
+\end{equation}
+
+\noindent where $R_\ell(f)$ and $L_\ell(f)$ are frequency-dependent due to skin effect and ground return path variations.
+
+For the overhead line configuration used in this study, ATP calculates the modal characteristic impedances at traveling wave frequencies ($> 1$ kHz) as:
+
+\begin{itemize}
+    \item \textbf{Line-mode surge impedance:} $Z_{C1} \approx 561.86$ $\Omega$
+    \item \textbf{Zero-mode surge impedance:} $Z_{C0} \approx 280.90$ $\Omega$  
+\end{itemize}
+
+These values are extracted from the ATP-generated punch file and are consistent with typical overhead HVDC line configurations.
+
+\subsubsection{Segmented Line Implementation}
+
+Table \ref{table:line_params} summarizes the transmission line model parameters. The segmented configuration enables precise fault location testing by activating fault switches at specific segment junctions, allowing simulation of internal faults at 50 km, 100 km, 150 km, 200 km, and 250 km from the protection relay location.
+
+\begin{table}[!t]
+\centering
+\caption{DC Transmission Line Model Parameters}
+\label{table:line_params}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Parameter} & \textbf{Value} \\
+\hline
+Total line length & 300 km \\
+Number of segments & 6 $\times$ 50 km \\
+Modeling method & J. Marti frequency-dependent \\
+Conductor radius & 13.6 mm \\
+GMR & 3.12 mm \\
+Pole spacing & 10 m \\
+Height above ground & 20 m \\
+Ground resistivity & 15 $\Omega\cdot$m \\
+Frequency range & 0.001 Hz -- 1 MHz \\
+Line-mode impedance $Z_{C1}$ & 561.86 $\Omega$ \\
+Zero-mode impedance $Z_{C0}$ & 280.90 $\Omega$ \\
+\hline
+\end{tabular}
+\end{table}analysis, which provides clearer fault signatures for all four protection methods.
+
+\subsection{Fault Analysis: Internal Faults}
+
+\subsubsection{Pole-to-Ground Fault (PGF)}
+
+Consider an internal pole-to-ground fault at location $f_1$ with fault resistance $R_f$. The boundary conditions at the fault point in the $s$-domain are:
+
+\begin{equation}
+\begin{cases}
+U_{fp} = -\frac{U_N}{s} + I_{fp}R_f \\
+I_{fn} = 0
+\end{cases}
+\end{equation}
+
+where $U_N = 500$ kV is the rated DC voltage. Applying the Kellenberger transformation yields the mode-domain equations:
+
+\begin{equation}
+\begin{cases}
+U_{f1} + U_{f0} = -\frac{\sqrt{2}U_N}{s} + (I_{f1} + I_{f0})R_f \\
+I_{f0} - I_{f1} = 0
+\end{cases}
+\end{equation}
+
+From the circuit analysis with the Bergeron model, the line-mode fault voltage is:
+
+\begin{equation}
+U_{f1}(s) = -\frac{\sqrt{2}Z_{C1}U_N}{Z_{C1} + Z_{C0} + 4R_f} \cdot \frac{1}{s}
+\end{equation}
+
+The initial traveling wave arriving at protection point M can be expressed as:
+
+\begin{equation}
+B_{m1}(s) = 2H_1(s) \cdot U_{f1}(s) = \frac{2(1 - k_1l)}{1 + s\tau_1 l} \cdot U_{f1}(s) \cdot e^{-\frac{sl}{v_1}}
+\end{equation}
+
+The backward traveling wave voltage measured at M is:
+
+\begin{equation}
+U_{b1}(s) = \frac{1}{2}(U_{m1}(s) - I_{m1}(s)Z_{C1}) = \frac{1}{2}B_{m1}(s)
+\end{equation}
+
+Applying inverse Laplace transform, the time-domain expression is:
+
+\begin{equation}
+U_{b1}(t) = \frac{\sqrt{2}U_NZ_{C1}(k_1l - 1)}{Z_{C1} + Z_{C0} + 4R_f} \left(e^{-\frac{t}{\tau_1 l + \frac{1}{v_1\tau_1}}} - 1\right)
+\end{equation}
+
+\textbf{Key characteristic:} For internal faults, the backward traveling wave voltage \textbf{plunges rapidly} to a minimum value and then \textbf{slowly recovers}. The rate of change exhibits a \textbf{sharp initial peak} followed by rapid decay.
+
+\subsubsection{Pole-to-Pole Fault (PPF)}
+
+For a pole-to-pole fault, the boundary conditions become:
+
+\begin{equation}
+\begin{cases}
+U_{fp} = -\frac{U_N}{s} + I_{fp}\frac{R_f}{2} \\
+U_{fn} = \frac{U_N}{s} + I_{fn}\frac{R_f}{2}
+\end{cases}
+\end{equation}
+
+The mode-domain equations show that no zero-mode component exists ($U_{f0} = 0$), and the line-mode fault voltage is:
+
+\begin{equation}
+U_{f1}(s) = -\frac{\sqrt{2}Z_{C1}U_N}{Z_{C1} + R_f} \cdot \frac{1}{s}
+\end{equation}
+
+Following similar derivation, the time-domain backward traveling wave is:
+
+\begin{equation}
+U_{b1}(t) = \frac{\sqrt{2}U_NZ_{C1}(k_1l - 1)}{Z_{C1} + R_f} \left(e^{-\frac{t}{\tau_1 l + \frac{1}{v_1\tau_1}}} - 1\right)
+\end{equation}
+
+Comparing Eq. (14) and Eq. (16), the difference between PGF and PPF is primarily in amplitude (denominator terms), while the overall waveform characteristics remain similar.
+
+\subsection{Fault Analysis: External Faults}
+
+For an external fault at $f_2$ (beyond the CLR), the fault voltage must propagate through the current-limiting reactor, which acts as a low-pass filter, significantly attenuating high-frequency components and distorting the wavefront.
+
+The equivalent impedance seen from the fault point includes the CLR:
+
+\begin{equation}
+\begin{cases}
+Z^P_1 = (Z_{C1} + sL_{dc}) \parallel Z_{M2} \\
+Z^P_0 = (Z_{C0} + sL_{dc}) \parallel Z_{M2}
+\end{cases}
+\end{equation}
+
+where $L_{dc}$ is the CLR inductance, and $Z_{M2}$ is the impedance of the remote MMC station.
+
+The line-mode fault voltage at the fault point is:
+
+\begin{equation}
+U_{f1}(s) = -\frac{\sqrt{2}Z^P_1 U_N}{Z^P_1 + Z^P_0 + 4R_f} \cdot \frac{1}{s}
+\end{equation}
+
+The initial traveling wave entering the protected line through the CLR is:
+
+\begin{equation}
+U'_{f1}(s) = -\frac{Z_{C1}}{Z_{C1} + sL_{dc}} U_{f1}(s)
+\end{equation}
+
+After applying the Bergeron model and inverse Laplace transform, the backward traveling wave at M becomes:
+
+\begin{equation}
+U_{b1}(t) = K \cdot \left[A + B \cdot e^{-\alpha t} - C \cdot e^{-\beta t + \gamma}\right]
+\label{eq:external_fault_voltage}
+\end{equation}
+
+\noindent where:
+\begin{align}
+K &= \frac{\sqrt{2}U_N(k_1l - 1)Z_{C1}Z^P_1}{Z^P_1 + Z^P_0 + 2R_f} \\
+A &= \frac{1}{Z_{C1}} \\
+B &= \frac{\tau_1 l}{L_{dc} - Z_{C1}\tau_1 l} \\
+C &= \frac{L_{dc}}{Z_{C1}(L_{dc} - Z_{C1}\tau_1 l)} \\
+\alpha &= \frac{1}{\tau_1 l + \frac{1}{v_1\tau_1}} \\
+\beta &= \frac{Z_{C1}}{L_{dc}} \\
+\gamma &= \frac{Z_{C1}l}{v_1L_{dc}}
+\end{align}
+
+\textbf{Key characteristic:} For external faults, the backward traveling wave voltage exhibits a \textbf{slow, gradual decline} due to CLR filtering. The rate of change shows a \textbf{moderate initial peak with slow decay}, distinctly different from internal faults.
+
+\subsection{Rate of Change of Traveling Wave (ROCOTW)}
+
+The rate of change of the backward traveling wave voltage, denoted as ROCOTW, is defined as:
+
+\begin{equation}
+\text{ROCOTW}(t) = \frac{dU_{b1}(t)}{dt}
+\end{equation}
+
+For digital implementation with sampling interval $\Delta t$:
+
+\begin{equation}
+\text{ROCOTW}[n] = \frac{U_{b1}[n] - U_{b1}[n-1]}{\Delta t}
+\end{equation}
+
+In practice, Savitzky-Golay filtering is applied to reduce noise while preserving edge information:
+
+\begin{equation}
+\text{ROCOTW}[n] = \text{SavGol}\left(U_{b1}[n], w=11, p=3, d=1\right)
+\end{equation}
+
+where $w$ is the window length, $p$ is the polynomial order, and $d=1$ indicates first derivative.
+
+\subsection{Fundamental Differences Between Internal and External Faults}
+
+Table~\ref{table:fault_differences_final} summarizes the key distinguishing features between internal and external faults.
+
+% Most compact and professional version for IEEE journals
+\begin{table}[!t]
+\centering
+\caption{Characteristic Differences Between Internal and External Faults}
+\label{table:fault_differences_final}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Feature} & \textbf{Internal Fault} & \textbf{External Fault} \\
+\hline
+\hline
+Wavefront steepness & Sharp edge & Rounded \\
+\hline
+ROCOTW peak & High & Low \\
+\hline
+ROCOTW decay & Rapid & Slow \\
+\hline
+Overall waveform & Drop-recovery & Continuous decline \\
+\hline
+High-freq. content & Rich & Attenuated \\
+\hline
+Lipschitz exp. $\alpha$ & $< 0.5$ & $> 0.5$ \\
+\hline
+$R_f$ effect & Amplitude & Amplitude \& shape \\
+\hline
+\end{tabular}
+\end{table}
+
+These fundamental differences enable the four protection algorithms to distinguish fault types:
+
+\begin{itemize}
+    \item \textbf{Wavelet Transform:} Exploits singularity strength (Lipschitz exponent) and energy distribution across frequency scales
+    \item \textbf{DTW:} Measures similarity considering optimal time-domain alignment
+    \item \textbf{Cross-Correlation:} Quantifies linear pattern matching between waveforms
+    \item \textbf{Fréchet Distance:} Evaluates geometric similarity of ROCOTW curves
+\end{itemize}
+
+The next section presents detailed descriptions of these four algorithms and their implementation.
+
+% Section III - Protection Algorithm Descriptions
+% Section III - Protection Algorithm Descriptions
+\section{Protection Algorithm Descriptions}
+
+This section presents detailed mathematical formulations, implementation procedures, and comprehensive experimental results for the four advanced traveling wave protection algorithms under comparison. All algorithms operate on the same input signal (line-mode ROCOTW) but employ different pattern analysis techniques to distinguish internal from external faults. Each algorithm is evaluated across 28 fault scenarios simulated in ATP-EMTP, covering internal faults at five locations (50 km, 100 km, 150 km, 200 km, 250 km) and external faults (forward and reverse) with fault resistances ranging from 0~$\Omega$ to 600~$\Omega$.
+
+\subsection{Common Pre-Processing Steps}
+
+Before applying any classification algorithm, several common pre-processing steps are performed to ensure consistent signal conditioning across all methods.
+
+\subsubsection{Fault Initiation Detection}
+
+A voltage derivative-based starting criterion is employed:
+
+\begin{equation}
+\left|\frac{dU_{m1}(t)}{dt}\right| > U_{set}
+\end{equation}
+
+where $U_{m1}(t)$ is the measured line-mode voltage at protection point M, and $U_{set}$ is a threshold determined from baseline noise levels. The threshold is dynamically calculated as:
+
+\begin{equation}
+U_{set} = \mu_{baseline} + 5\sigma_{baseline}
+\end{equation}
+
+where $\mu_{baseline}$ and $\sigma_{baseline}$ are the mean and standard deviation of the voltage derivative during a pre-fault baseline period (0.2-0.4 ms).
+
+\subsubsection{ROCOTW Calculation}
+
+The Rate of Change of Traveling Wave is computed using Savitzky-Golay filtering, which provides smoothed derivative estimation while preserving edge sharpness:
+
+\begin{equation}
+\text{ROCOTW}[n] = \text{SavGol}\left(U_{b1}[n], w=11, p=3, d=1\right)
+\end{equation}
+
+where $w$ is the window length, $p$ is the polynomial order, and $d=1$ indicates first derivative. This approach reduces noise while maintaining the critical transient features needed for classification.
+
+\subsubsection{Normalization}
+
+To eliminate amplitude variations due to fault resistance, the ROCOTW is normalized to the [0, 1] range:
+
+\begin{equation}
+\hat{u}_{b1}[n] = \frac{u_{b1}[n] - \min(u_{b1})}{\max(u_{b1}) - \min(u_{b1})}
+\end{equation}
+
+This normalization ensures that pattern matching focuses on waveform shape rather than magnitude.
+
+% ============================================================================
+% Algorithm 1 - Discrete Wavelet Transform with Energy Distribution Analysis
+% ============================================================================
+
+\subsection{Algorithm 1: Discrete Wavelet Transform with Energy Distribution Analysis}
+
+\subsubsection{Mathematical Foundation}
+
+The Discrete Wavelet Transform (DWT) decomposes a signal into approximation and detail coefficients at multiple resolution levels:
+
+\begin{equation}
+\text{DWT}(u_{b1}) = [cA_J, cD_J, cD_{J-1}, \ldots, cD_1]
+\end{equation}
+
+where $J$ is the decomposition level, $cA_J$ represents the approximation coefficients at the coarsest scale, and $cD_j$ are detail coefficients at scale $j$.
+
+The Daubechies-4 (db4) wavelet is selected due to its proven effectiveness in power system transient analysis \cite{wavelet_power_systems, daubechies1992}, offering:
+\begin{itemize}
+\item Compact support (enabling temporal localization)
+\item Sufficient vanishing moments (for singularity detection)
+\item Smoothness properties (avoiding spurious oscillations)
+\end{itemize}
+
+\subsubsection{Energy Distribution Analysis}
+
+The energy at each detail level is calculated as:
+
+\begin{equation}
+E_j = \sum_{n=1}^{N_j} |cD_j[n]|^2
+\end{equation}
+
+where $N_j$ is the number of coefficients at level $j$. The normalized energy distribution is:
+
+\begin{equation}
+\tilde{E}_j = \frac{E_j}{\sum_{k=1}^{J} E_k}
+\end{equation}
+
+The normalized energy vector forms the feature representation:
+
+\begin{equation}
+\mathbf{E} = [\tilde{E}_1, \tilde{E}_2, \ldots, \tilde{E}_J]^T
+\end{equation}
+
+\subsubsection{Classification Criterion}
+
+Reference energy patterns are established from known fault cases. Classification is performed using Euclidean distance to these reference patterns:
+
+\begin{equation}
+d_{int} = \|\mathbf{E} - \mathbf{E}_{int}^{ref}\|_2, \quad d_{ext} = \|\mathbf{E} - \mathbf{E}_{ext}^{ref}\|_2
+\end{equation}
+
+The fault type is determined by the minimum distance:
+
+\begin{equation}
+\text{Fault Type} = \begin{cases}
+\text{INTERNAL} & \text{if } d_{int} < d_{ext} \\
+\text{EXTERNAL} & \text{if } d_{ext} < d_{int}
+\end{cases}
+\end{equation}
+
+\subsubsection{Implementation Details}
+
+\textbf{Parameters:}
+\begin{itemize}
+\item Mother wavelet: Daubechies-4 (db4)
+\item Decomposition levels: 4
+\item Analysis window: 1.0 ms post-fault
+\item Sampling frequency: 100 kHz
+\item Internal reference: Metallic PGF at 150 km
+\item External reference: Forward fault with $R_f = 200~\Omega$
+\end{itemize}
+
+% ============================================================================
+% Algorithm 2 - Dynamic Time Warping Distance Metric
+% ============================================================================
+
+\subsection{Algorithm 2: Dynamic Time Warping Distance Metric}
+
+\subsubsection{Mathematical Foundation}
+
+Dynamic Time Warping (DTW) computes the optimal alignment between two time series by allowing non-linear time-axis warping. The DTW cost matrix $D(i,j)$ is computed recursively using the \textit{symmetric-2 step pattern}:
+
+\begin{equation}
+D(i,j) = d(x_i, y_j) + \min\begin{cases}
+D(i-1, j) + d(x_i, y_j) & \text{(vertical)} \\
+D(i, j-1) + d(x_i, y_j) & \text{(horizontal)} \\
+D(i-1, j-1) & \text{(diagonal)}
+\end{cases}
+\end{equation}
+
+with boundary conditions $D(0,0) = 0$ and $D(i,0) = D(0,j) = \infty$, where $d(x_i, y_j) = (x_i - y_j)^2$. The symmetric-2 pattern applies double weighting to horizontal and vertical steps (insertions/deletions) while diagonal steps (matches) carry single weight, penalizing temporal distortion.
+
+\subsubsection{Sakoe-Chiba Band Constraint}
+
+To improve computational efficiency and prevent pathological alignments, a Sakoe-Chiba band constraint is applied:
+
+\begin{equation}
+|i - j| \leq w, \quad w = \max(5, \lfloor 0.1 \cdot \max(n,m) \rfloor)
+\end{equation}
+
+where the window width $w$ is set to 10\% of the maximum sequence length with a minimum of 5 samples.
+
+\subsubsection{Normalized DTW Distance}
+
+The final DTW distance is normalized by path length:
+
+\begin{equation}
+\text{DTW}(\mathbf{X}, \mathbf{Y}) = \sqrt{\frac{D(n,m)}{n + m}}
+\end{equation}
+
+\subsubsection{Classification Criterion}
+
+For a measured ROCOTW pattern, DTW distances to both references are computed, and classification is based on minimum distance:
+
+\begin{equation}
+\text{Fault Type} = \begin{cases}
+\text{INTERNAL} & \text{if } D_{int} < D_{ext} \\
+\text{EXTERNAL} & \text{if } D_{ext} < D_{int}
+\end{cases}
+\end{equation}
+
+\subsubsection{Implementation Details}
+
+\textbf{Parameters:}
+\begin{itemize}
+\item Input: Normalized ROCOTW from 1.0 ms post-fault window
+\item Normalization: Min-max scaling to [0, 1]
+\item Sakoe-Chiba band: 10\% of sequence length (minimum 5 samples)
+\item Internal reference: Metallic PGF at 150 km
+\item External reference: Forward fault with $R_f = 0~\Omega$
+\end{itemize}
+
+% ============================================================================
+% Algorithm 3 - Cross-Correlation Coefficient Analysis
+% ============================================================================
+
+\subsection{Algorithm 3: Cross-Correlation Coefficient Analysis}
+
+\subsubsection{Mathematical Foundation}
+
+Cross-correlation measures similarity between signals. The normalized cross-correlation coefficient at zero lag is:
+
+\begin{equation}
+\rho_{xy} = \frac{\sum_{i=1}^{n} \bar{x}_i \cdot \bar{y}_i}{\sqrt{\sum_{i=1}^{n} \bar{x}_i^2} \cdot \sqrt{\sum_{i=1}^{n} \bar{y}_i^2}}
+\end{equation}
+
+where $\bar{x}_i = x_i - \mu_x$ are centered signals.
+
+\subsubsection{Classification Criterion}
+
+For a measured ROCOTW pattern, correlation coefficients with both references are computed:
+
+\begin{equation}
+\rho_{int} = \rho(\mathbf{X}_{meas}, \mathbf{X}_{int}^{ref}), \quad \rho_{ext} = \rho(\mathbf{X}_{meas}, \mathbf{X}_{ext}^{ref})
+\end{equation}
+
+Classification is based on maximum correlation:
+
+\begin{equation}
+\text{Fault Type} = \begin{cases}
+\text{INTERNAL} & \text{if } \rho_{int} > \rho_{ext} \\
+\text{EXTERNAL} & \text{if } \rho_{ext} > \rho_{int}
+\end{cases}
+\end{equation}
+
+\subsubsection{Implementation Details}
+
+\textbf{Parameters:}
+\begin{itemize}
+\item Input: Normalized ROCOTW from 1.0 ms post-fault window
+\item Correlation type: Zero-lag normalized cross-correlation
+\item Internal reference: Metallic PGF at 150 km
+\item External reference: Forward fault with $R_f = 0~\Omega$
+\end{itemize}
+
+% ============================================================================
+% Algorithm 4 - Fréchet Distance of ROCOTW Curves
+% ============================================================================
+
+% ============================================================================
+% SECTION: Fréchet Distance-Based Fault Classification
+% ============================================================================
+% Required packages (add to preamble):
+% \usepackage{graphicx}
+% \usepackage{amsmath}
+% \usepackage{amssymb}
+% \usepackage{subcaption}
+% ============================================================================
+
+\subsection{Algorithm 4: Fréchet Distance-Based ROCOTW Classification}
+
+The Fréchet distance provides a robust metric for comparing traveling wave signatures by accounting for both shape similarity and temporal ordering. Unlike point-wise distance measures, the Fréchet distance captures the overall geometric correspondence between curves, making it particularly suitable for fault classification where waveform morphology is the discriminating feature.
+
+\subsubsection{Mathematical Foundation}
+
+The discrete Fréchet distance between two sequences $\mathbf{P} = (p_1, p_2, \ldots, p_n)$ and $\mathbf{Q} = (q_1, q_2, \ldots, q_m)$ is computed via dynamic programming. The coupling matrix $C(i,j)$ is defined recursively as:
+
+\begin{equation}
+C(i,j) = \max\left(\min\begin{cases}
+C(i-1,j) \\
+C(i,j-1) \\
+C(i-1,j-1)
+\end{cases}, d(p_i, q_j)\right)
+\label{eq:frechet_coupling}
+\end{equation}
+
+\noindent with the base case $C(1,1) = d(p_1, q_1)$, where the distance function $d(p_i, q_j) = |p_i - q_j|$ represents the absolute difference between corresponding points. The Fréchet distance is then obtained as:
+
+\begin{equation}
+F(\mathbf{P}, \mathbf{Q}) = C(n, m)
+\label{eq:frechet_final}
+\end{equation}
+
+This formulation ensures that the computed distance reflects the minimum "leash length" required to simultaneously traverse both curves from start to end, respecting their temporal ordering.
+
+\subsubsection{Reference Curve Establishment}
+
+Two reference ROCOTW signatures are established from representative fault cases to serve as classification templates:
+
+\begin{itemize}
+    \item \textbf{Internal reference} $(\mathbf{P}_{int}^{ref})$: Derived from a metallic pole-to-ground fault at 150 km, representing the characteristic internal fault signature with sustained high-amplitude oscillations.
+    \item \textbf{External reference} $(\mathbf{P}_{ext}^{ref})$: Derived from a forward external fault with $R_f = 0~\Omega$, exhibiting the typical rapid decay pattern of external disturbances.
+\end{itemize}
+
+Fig.~\ref{fig:reference_curves} illustrates the normalized reference curves, highlighting the distinct morphological differences between internal and external fault signatures. The internal reference exhibits a broader profile with sustained amplitude, while the external reference demonstrates rapid attenuation characteristic of reflected traveling waves at the protection zone boundary.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\columnwidth]{Figure_1.png}
+    \caption{Normalized ROCOTW reference curves for internal fault at 150 km  200$\Omega$ and external 200$\Omega$ forward fault.}
+    \label{fig:reference_curves}
+\end{figure}
+
+\subsubsection{Signal Processing Pipeline}
+
+Prior to Fréchet distance computation, the measured ROCOTW signal undergoes the following preprocessing steps:
+
+\begin{enumerate}
+    \item \textbf{Window extraction}: A 1.0 ms analysis window is extracted starting from the detected fault inception time $t_f$.
+    \item \textbf{Normalization}: Min-max scaling is applied to map values to the $[0, 1]$ range:
+    \begin{equation}
+    \tilde{x}_i = \frac{x_i - x_{\min}}{x_{\max} - x_{\min}}
+    \label{eq:normalization}
+    \end{equation}
+    \item \textbf{Resampling}: Linear interpolation resamples all curves to a uniform length of 100 points, ensuring consistent comparison regardless of original sampling rates.
+\end{enumerate}
+
+\subsubsection{Classification Criterion}
+
+For a measured ROCOTW curve $\mathbf{P}_{meas}$, Fréchet distances to both reference templates are computed:
+
+\begin{equation}
+F_{int} = F(\mathbf{P}_{meas}, \mathbf{P}_{int}^{ref}), \quad F_{ext} = F(\mathbf{P}_{meas}, \mathbf{P}_{ext}^{ref})
+\label{eq:frechet_distances}
+\end{equation}
+
+The fault classification decision follows the minimum distance criterion:
+
+\begin{equation}
+\text{Fault Type} = \begin{cases}
+\text{INTERNAL} & \text{if } F_{int} < F_{ext} \\
+\text{EXTERNAL} & \text{if } F_{ext} < F_{int}
+\end{cases}
+\label{eq:classification}
+\end{equation}
+
+Additionally, a confidence metric is defined based on the discrimination margin:
+
+\begin{equation}
+\Delta F = |F_{int} - F_{ext}|
+\label{eq:margin}
+\end{equation}
+
+\noindent where $\Delta F > 0.15$ indicates high confidence, $0.05 < \Delta F \leq 0.15$ indicates medium confidence, and $\Delta F \leq 0.05$ indicates low confidence requiring potential secondary verification.
+
+\subsubsection{Method Execution Flow}
+
+The complete Fréchet distance classification algorithm is summarized in the flowchart presented in Fig.~\ref{fig:flowchart}. The process begins with the extracted ROCOTW signal from the post-fault window, proceeds through normalization and resampling stages, and culminates in the comparative distance computation against both reference templates.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\columnwidth]{ATP Output (Wattpad Book Cover).jpg}
+    \caption{Flowchart of the Fréchet distance-based fault classification algorithm.}
+    \label{fig:flowchart}
+\end{figure}
+
+\subsubsection{Classification Results}
+
+Fig.~\ref{fig:curve_comparison} demonstrates the curve matching process for representative internal and external fault cases. In the internal fault case (Fig.~\ref{fig:curve_comparison}a), the measured curve closely follows the internal reference, yielding $F_{int} < F_{ext}$. Conversely, for the external fault case (Fig.~\ref{fig:curve_comparison}b), the measured signature aligns with the external reference, resulting in $F_{ext} < F_{int}$.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\columnwidth]{fig_curve_comparison.png}
+    \caption{Fréchet distance curve matching: (a) internal fault case showing closer alignment with internal reference, (b) external fault case showing closer alignment with external reference. Shaded regions indicate the area contributing to the minimum Fréchet distance.}
+    \label{fig:curve_comparison}
+\end{figure}
+
+The comprehensive classification results across multiple test cases are presented in Fig.~\ref{fig:fin_fout_results}. The bar chart displays $F_{int}$ and $F_{ext}$ values for various internal faults (at different locations) and external faults (with different configurations). Green markers indicate correct classifications where the algorithm successfully identified the fault type based on the minimum Fréchet distance criterion.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\columnwidth]{fig_fin_fout_results.png}
+    \caption{Fréchet distance classification results showing $F_{int}$ and $F_{ext}$ values for internal faults (50--250 km) and external faults. Green triangles indicate correct classification.}
+    \label{fig:fin_fout_results}
+\end{figure}
+
+\subsubsection{Implementation Parameters}
+
+Table~\ref{tab:fd_parameters} summarizes the key parameters used in the Fréchet distance classification algorithm.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Fréchet Distance Algorithm Parameters}
+    \label{tab:fd_parameters}
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Parameter} & \textbf{Value} \\
+        \hline
+        Analysis window duration & 1.0 ms \\
+        Resampling points & 100 \\
+        Interpolation method & Linear \\
+        Normalization & Min-max $[0, 1]$ \\
+        Internal reference location & 150 km (metallic PGF) \\
+        External reference & Forward fault, $R_f = 0~\Omega$ \\
+        High confidence threshold & $\Delta F > 0.15$ \\
+        Medium confidence threshold & $0.05 < \Delta F \leq 0.15$ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% ============================================================================
+% END OF SECTION
+% ============================================================================
+
+% ============================================================================
+% COMPREHENSIVE RESULTS - ALL ALGORITHMS IN ONE TABLE
+% ============================================================================
+
+\subsection{Comprehensive Experimental Results}
+
+Table~\ref{tab:all_results} presents the complete classification results for all four algorithms across 28 fault scenarios, enabling direct performance comparison.
+
+\begin{table*}[!t]
+\centering
+\caption{Classification Results for All Four Algorithms}
+\label{tab:all_results}
+\small
+\begin{tabular}{@{}llcccccccc@{}}
+\toprule
+& & \multicolumn{2}{c}{\textbf{DWT Energy}} & \multicolumn{2}{c}{\textbf{DTW}} & \multicolumn{2}{c}{\textbf{Correlation}} & \multicolumn{2}{c}{\textbf{Fréchet}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10}
+\textbf{Location} & $\mathbf{R_f}$ ($\Omega$) & $d_{int}$ & $d_{ext}$ & $D_{int}$ & $D_{ext}$ & $\rho_{int}$ & $\rho_{ext}$ & $F_{int}$ & $F_{ext}$ \\
+\midrule
+\multicolumn{10}{l}{\textit{Internal Faults}} \\
+\midrule
+50 km  & 0   & 0.453 & \textbf{0.374} & 0.990 & \textbf{0.925} & $-$0.130 & \textbf{+0.143} & 0.684 & \textbf{0.374} \\
+       & 200 & \textbf{0.267} & 0.338 & \textbf{0.802} & 0.817 & \textbf{$-$0.121} & $-$0.085 & 0.425 & \textbf{0.345} \\
+       & 400 & \textbf{0.097} & 0.175 & \textbf{0.789} & 0.831 & \textbf{$-$0.065} & $-$0.060 & \textbf{0.499} & 0.580 \\
+       & 600 & \textbf{0.046} & 0.127 & \textbf{0.792} & 0.839 & \textbf{$-$0.035} & $-$0.036 & \textbf{0.450} & 0.580 \\
+\cmidrule{1-10}
+100 km & 0   & \textbf{0.055} & 0.134 & \textbf{0.934} & 1.029 & \textbf{$-$0.380} & $-$0.409 & 0.500 & \textbf{0.373} \\
+       & 200 & \textbf{0.578} & 0.655 & \textbf{0.834} & 0.973 & \textbf{$-$0.214} & $-$0.636 & \textbf{0.498} & 0.518 \\
+       & 400 & \textbf{0.598} & 0.674 & \textbf{0.781} & 0.905 & \textbf{$-$0.093} & $-$0.661 & \textbf{0.456} & 0.579 \\
+       & 600 & \textbf{0.585} & 0.661 & \textbf{0.740} & 0.876 & \textbf{$-$0.035} & $-$0.656 & \textbf{0.464} & 0.579 \\
+\cmidrule{1-10}
+150 km & 0   & \textbf{0.093} & 0.172 & \textbf{0.000} & 0.229 & \textbf{+0.879} & +0.202 & \textbf{0.112} & 0.538 \\
+       & 200 & \textbf{0.000} & 0.082 & 0.254 & \textbf{0.028} & \textbf{+1.000} & +0.633 & \textbf{0.000} & 0.580 \\
+       & 400 & \textbf{0.038} & 0.046 & 0.418 & \textbf{0.214} & \textbf{+0.951} & +0.831 & \textbf{0.113} & 0.466 \\
+       & 600 & 0.057 & \textbf{0.030} & 0.529 & \textbf{0.333} & +0.880 & \textbf{+0.909} & \textbf{0.207} & 0.372 \\
+\cmidrule{1-10}
+200 km & 0   & 0.520 & \textbf{0.453} & \textbf{0.312} & 0.383 & \textbf{+0.774} & +0.368 & 0.603 & \textbf{0.047} \\
+       & 200 & \textbf{0.268} & 0.347 & \textbf{0.357} & 0.512 & \textbf{+0.511} & $-$0.198 & \textbf{0.237} & 0.413 \\
+       & 400 & \textbf{0.408} & 0.486 & \textbf{0.459} & 0.605 & \textbf{+0.372} & $-$0.366 & \textbf{0.296} & 0.516 \\
+       & 600 & \textbf{0.453} & 0.531 & \textbf{0.505} & 0.652 & \textbf{+0.301} & $-$0.439 & \textbf{0.354} & 0.552 \\
+\cmidrule{1-10}
+250 km & 0   & \textbf{0.041} & 0.122 & 0.181 & \textbf{0.064} & \textbf{+0.994} & +0.583 & \textbf{0.013} & 0.580 \\
+       & 200 & \textbf{0.084} & 0.165 & \textbf{0.468} & 0.501 & \textbf{+0.659} & +0.311 & \textbf{0.216} & 0.580 \\
+       & 400 & \textbf{0.060} & 0.141 & \textbf{0.603} & 0.653 & \textbf{+0.444} & +0.204 & \textbf{0.315} & 0.580 \\
+       & 600 & \textbf{0.045} & 0.126 & \textbf{0.661} & 0.718 & \textbf{+0.339} & +0.157 & \textbf{0.364} & 0.580 \\
+\midrule
+\multicolumn{10}{l}{\textit{External Faults}} \\
+\midrule
+Forward & 0   & 0.008 & \textbf{0.090} & 0.229 & \textbf{0.000} & +0.999 & \textbf{+0.599} & 0.012 & \textbf{0.580} \\
+        & 200 & 0.082 & \textbf{0.000} & 0.758 & \textbf{0.582} & +0.633 & \textbf{+1.000} & 0.580 & \textbf{0.000} \\
+        & 400 & 0.089 & \textbf{0.009} & 0.807 & \textbf{0.624} & +0.570 & \textbf{+0.992} & 0.558 & \textbf{0.047} \\
+        & 600 & 0.093 & \textbf{0.015} & 0.821 & \textbf{0.635} & +0.552 & \textbf{+0.985} & 0.538 & \textbf{0.064} \\
+\cmidrule{1-10}
+Reverse & 0   & 0.031 & \textbf{0.097} & 1.373 & \textbf{1.261} & $-$0.558 & \textbf{+0.256} & 0.953 & \textbf{0.953} \\
+        & 200 & 0.022 & \textbf{0.094} & 1.026 & \textbf{0.899} & +0.197 & \textbf{+0.794} & 0.647 & \textbf{0.359} \\
+        & 400 & 0.058 & \textbf{0.047} & 0.911 & \textbf{0.752} & +0.411 & \textbf{+0.922} & 0.649 & \textbf{0.330} \\
+        & 600 & 0.074 & \textbf{0.036} & 0.883 & \textbf{0.709} & +0.461 & \textbf{+0.943} & 0.577 & \textbf{0.219} \\
+\midrule
+\multicolumn{2}{l}{\textbf{Overall Accuracy}} & \multicolumn{2}{c}{78.6\%} & \multicolumn{2}{c}{82.1\%} & \multicolumn{2}{c}{82.1\%} & \multicolumn{2}{c}{82.1\%} \\
+\multicolumn{2}{l}{Internal (20 cases)} & \multicolumn{2}{c}{85.0\%} & \multicolumn{2}{c}{75.0\%} & \multicolumn{2}{c}{80.0\%} & \multicolumn{2}{c}{80.0\%} \\
+\multicolumn{2}{l}{External (8 cases)} & \multicolumn{2}{c}{62.5\%} & \multicolumn{2}{c}{100\%} & \multicolumn{2}{c}{87.5\%} & \multicolumn{2}{c}{87.5\%} \\
+\bottomrule
+\end{tabular}
+\\[0.5em]
+\footnotesize{Bold values indicate the winning metric (minimum distance for DWT/DTW/Fréchet, maximum correlation for Correlation).}
+\end{table*}
+
+% ============================================================================
+% Performance Summary Table
+% ============================================================================
+
+\subsection{Performance Summary and Analysis}
+Key observations from the comparative analysis:
+
+\begin{itemize}
+\item \textbf{DWT Energy} achieved the highest internal fault accuracy (85.0\%) but the lowest external fault accuracy (62.5\%), making it more suitable for dependability-focused applications where internal fault detection is prioritized.
+
+\item \textbf{DTW} achieved perfect external fault detection (100\%) while maintaining reasonable internal fault accuracy (75.0\%), making it ideal for security-focused applications where avoiding false trips is critical.
+
+\item \textbf{Correlation} and \textbf{Fréchet} showed balanced performance with identical overall accuracy (82.1\%), providing a good compromise between dependability and security requirements.
+
+\item All algorithms struggled with metallic faults ($R_f = 0~\Omega$) at zone boundaries (50 km, 200 km, 250 km), which showed the highest misclassification rates due to similar ROCOTW characteristics between internal and external faults at these critical locations.
+
+\item The normalization process successfully eliminated fault resistance effects on amplitude, enabling all algorithms to maintain reasonable performance up to 600~$\Omega$ fault resistance.
+\end{itemize}
+
+All four algorithms operate on a 1.0~ms data window following fault detection at 100~kHz sampling frequency (100 samples). While computational complexity varies among methods---from $O(n)$ for cross-correlation to $O(nm)$ for DTW and Fréchet distance---all algorithms can execute within 2~ms on modern processors, meeting the critical time constraints of HVDC protection systems (2-3~ms decision window). Cross-correlation offers the fastest execution, while DWT and DTW require more processing time but provide enhanced robustness in challenging scenarios.
+
+% ============================================================================
+% SECTION IV - ENSEMBLE PROTECTION METHOD
+% ============================================================================
+
+\section{Ensemble Protection Method}
+
+The individual protection algorithms presented in Section III each exhibit unique strengths and weaknesses under varying fault conditions. While DWT excels at detecting high-frequency transient components, DTW provides robustness to timing variations, correlation offers computational efficiency, and Fréchet distance demonstrates excellent fault resistance tolerance. This section presents a novel weighted ensemble approach that synergistically combines all four algorithms to achieve superior classification accuracy and robustness compared to any individual method.
+
+\subsection{Motivation for Ensemble Approach}
+
+Analysis of the individual algorithm results in Table~\ref{tab:all_results} reveals complementary error patterns across the four methods. When examining the misclassification cases:
+
+\begin{itemize}
+    \item DWT Energy tends to misclassify external faults as internal, achieving 85.0\% accuracy on internal faults but only 62.5\% on external faults.
+    \item DTW achieves perfect external fault detection (100\%) but struggles with some internal faults at zone boundaries (75.0\% internal accuracy).
+    \item Correlation and Fréchet show balanced but imperfect performance on both fault types.
+\end{itemize}
+
+These complementary characteristics suggest that combining the methods through intelligent voting can compensate for individual weaknesses, particularly in challenging scenarios such as high-resistance faults and zone boundary conditions.
+
+\subsection{Weighted Voting Framework}
+
+The ensemble approach employs a confidence-weighted voting mechanism that considers both the classification decision and the certainty margin of each individual method.
+
+\subsubsection{Individual Method Confidence Assessment}
+
+For each detection method $m \in \{\text{FD}, \text{CORR}, \text{DTW}, \text{WL}\}$, a confidence level $c_m$ is assigned based on the discrimination margin:
+
+\begin{equation}
+\Delta_m = |s_m^{int} - s_m^{ext}|
+\end{equation}
+
+\noindent where $s_m^{int}$ and $s_m^{ext}$ are the similarity scores to internal and external references, respectively. The confidence mapping varies by method type:
+
+\textbf{For distance-based methods (FD, DTW, WL):}
+\begin{equation}
+c_m = \begin{cases}
+\text{HIGH} & \text{if } \Delta_m > \tau_H \\
+\text{MEDIUM} & \text{if } \tau_L < \Delta_m \leq \tau_H \\
+\text{LOW} & \text{if } \Delta_m \leq \tau_L
+\end{cases}
+\end{equation}
+
+\textbf{For correlation-based method (CORR):}
+\begin{equation}
+c_m = \begin{cases}
+\text{HIGH} & \text{if } \Delta_m > 0.30 \\
+\text{MEDIUM} & \text{if } 0.15 < \Delta_m \leq 0.30 \\
+\text{LOW} & \text{if } \Delta_m \leq 0.15
+\end{cases}
+\end{equation}
+
+The confidence levels are mapped to numerical weights:
+
+\begin{equation}
+w_c = \begin{cases}
+1.0 & \text{if } c_m = \text{HIGH} \\
+0.7 & \text{if } c_m = \text{MEDIUM} \\
+0.4 & \text{if } c_m = \text{LOW}
+\end{cases}
+\end{equation}
+
+\subsubsection{Weighted Score Calculation}
+
+Each method $m$ also carries a base weight $w_m$ (default: 1.0 for all methods), allowing tuning based on validation results. The effective weight for each vote is:
+
+\begin{equation}
+W_m = w_m \cdot w_c(m)
+\end{equation}
+
+The cumulative votes for internal and external classification are:
+
+\begin{equation}
+V_{int} = \sum_{m: d_m = \text{INT}} W_m, \quad V_{ext} = \sum_{m: d_m = \text{EXT}} W_m
+\end{equation}
+
+\noindent where $d_m$ is the decision of method $m$.
+
+\subsubsection{Ensemble Decision Rule}
+
+The normalized weighted score $S$ quantifies the classification strength:
+
+\begin{equation}
+S = \frac{V_{int} - V_{ext}}{V_{int} + V_{ext}} \in [-1, +1]
+\end{equation}
+
+The final classification is determined by:
+
+\begin{equation}
+\text{Decision} = \begin{cases}
+\text{INTERNAL} & \text{if } S > 0 \\
+\text{EXTERNAL} & \text{if } S < 0 \\
+\text{UNCERTAIN} & \text{if } S = 0
+\end{cases}
+\end{equation}
+
+\subsubsection{Ensemble Confidence Assessment}
+
+The agreement ratio $\alpha$ and weighted score magnitude determine the ensemble confidence:
+
+\begin{equation}
+\alpha = \frac{\max(V_{int}, V_{ext})}{V_{int} + V_{ext}}
+\end{equation}
+
+\begin{equation}
+\text{Confidence} = \begin{cases}
+\text{HIGH} & \text{if } \alpha > 0.85 \text{ and } |S| > 0.5 \\
+\text{MEDIUM} & \text{if } \alpha > 0.65 \text{ or } |S| > 0.3 \\
+\text{LOW} & \text{otherwise}
+\end{cases}
+\end{equation}
+
+\subsection{Implementation Architecture}
+
+Fig.~\ref{fig:ensemble_architecture} illustrates the ensemble protection system architecture. The implementation follows these steps:
+
+\begin{enumerate}
+    \item \textbf{Signal Acquisition:} Line-mode voltage and current measurements are acquired at 100 kHz sampling rate.
+    
+    \item \textbf{Fault Detection:} A hybrid fault inception detector identifies the fault start time using voltage derivative, divergence, and threshold methods.
+    
+    \item \textbf{Window Extraction:} A 1.0 ms analysis window is extracted following fault inception.
+    
+    \item \textbf{ROCOTW Calculation:} The Rate of Change of Traveling Wave is computed using Savitzky-Golay differentiation.
+    
+    \item \textbf{Parallel Method Execution:} All four algorithms process the ROCOTW independently:
+    \begin{itemize}
+        \item Fréchet distance to internal/external references
+        \item Cross-correlation coefficients
+        \item DTW distances with Sakoe-Chiba constraint
+        \item Wavelet energy distribution comparison
+    \end{itemize}
+    
+    \item \textbf{Confidence-Weighted Voting:} Individual decisions are combined using the weighted voting framework.
+    
+    \item \textbf{Trip Decision:} Final classification with confidence level is output for protection action.
+\end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\columnwidth]{Start.jpg}
+\caption{Ensemble protection system architecture showing parallel execution of four algorithms and weighted voting combination.}
+\label{fig:ensemble_architecture}
+\end{figure}
+
+\subsection{Experimental Results}
+
+The ensemble method was evaluated on the same 28 fault scenarios used for individual algorithm testing. Table~\ref{tab:ensemble_results} presents the complete ensemble classification results with individual method contributions.
+
+\begin{table*}[!t]
+\centering
+\caption{Ensemble Classification Results with Individual Method Votes}
+\label{tab:ensemble_results}
+\small
+\begin{tabular}{@{}llcccccccccc@{}}
+\toprule
+& & \multicolumn{4}{c}{\textbf{Individual Method Decisions}} & \multicolumn{2}{c}{\textbf{Votes}} & \multicolumn{3}{c}{\textbf{Ensemble Result}} \\
+\cmidrule(lr){3-6} \cmidrule(lr){7-8} \cmidrule(lr){9-11}
+\textbf{Location} & $\mathbf{R_f}$ & \textbf{FD} & \textbf{CORR} & \textbf{DTW} & \textbf{WL} & $V_{int}$ & $V_{ext}$ & \textbf{Decision} & \textbf{Score} & \textbf{Conf.} \\
+\midrule
+\multicolumn{11}{l}{\textit{Internal Faults}} \\
+\midrule
+50 km  & 0 $\Omega$   & E & E & E & E & 0 & 4 & EXTERNAL$^\dagger$ & $-$1.00 & HIGH \\
+       & 200 $\Omega$ & E & E & I & I & 2 & 2 & INTERNAL & +0.12 & LOW \\
+       & 400 $\Omega$ & I & E & I & I & 3 & 1 & INTERNAL & +0.71 & HIGH \\
+       & 600 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+\cmidrule{1-11}
+100 km & 0 $\Omega$   & E & I & I & I & 3 & 1 & INTERNAL & +0.55 & MED \\
+       & 200 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+       & 400 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+       & 600 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+\cmidrule{1-11}
+150 km & 0 $\Omega$   & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+       & 200 $\Omega$ & I & I & E & I & 3 & 1 & INTERNAL & +0.50 & MED \\
+       & 400 $\Omega$ & I & I & E & I & 3 & 1 & INTERNAL & +0.29 & LOW \\
+       & 600 $\Omega$ & I & E & E & E & 1 & 3 & EXTERNAL$^\dagger$ & $-$0.35 & MED \\
+\cmidrule{1-11}
+200 km & 0 $\Omega$   & E & I & I & E & 2 & 2 & EXTERNAL$^\dagger$ & 0.00 & LOW \\
+       & 200 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+       & 400 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+       & 600 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+\cmidrule{1-11}
+250 km & 0 $\Omega$   & I & I & E & I & 3 & 1 & INTERNAL & +0.50 & MED \\
+       & 200 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+       & 400 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+       & 600 $\Omega$ & I & I & I & I & 4 & 0 & INTERNAL & +1.00 & HIGH \\
+\midrule
+\multicolumn{11}{l}{\textit{External Faults}} \\
+\midrule
+Forward & 0 $\Omega$   & I & I & E & I & 3 & 1 & INTERNAL$^\dagger$ & +0.50 & MED \\
+        & 200 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.00 & HIGH \\
+        & 400 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.00 & HIGH \\
+        & 600 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.00 & HIGH \\
+\cmidrule{1-11}
+Reverse & 0 $\Omega$   & E & E & E & I & 1 & 3 & EXTERNAL & $-$0.41 & MED \\
+        & 200 $\Omega$ & E & E & E & I & 1 & 3 & EXTERNAL & $-$0.50 & MED \\
+        & 400 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.00 & HIGH \\
+        & 600 $\Omega$ & E & E & E & E & 0 & 4 & EXTERNAL & $-$1.00 & HIGH \\
+\bottomrule
+\end{tabular}
+\\[0.5em]
+\footnotesize{I = Internal, E = External. $^\dagger$Misclassified cases. Conf. = Confidence level (HIGH/MED/LOW).}
+\end{table*}
+
+\subsection{Performance Analysis}
+
+\subsubsection{Overall Accuracy}
+
+The ensemble method achieves an overall classification accuracy of \textbf{85.7\%} (24/28 cases), representing an improvement over each individual method:
+
+\begin{itemize}
+    \item Fréchet Distance: 82.1\% (23/28)
+    \item Cross-Correlation: 82.1\% (23/28)
+    \item Dynamic Time Warping: 82.1\% (23/28)
+    \item Wavelet Energy: 78.6\% (22/28)
+\end{itemize}
+
+Table~\ref{tab:accuracy_comparison} summarizes the comparative accuracy across different fault categories.
+
+\begin{table}[!t]
+\centering
+\caption{Accuracy Comparison: Individual Methods vs. Ensemble}
+\label{tab:accuracy_comparison}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Category} & \textbf{FD} & \textbf{CORR} & \textbf{DTW} & \textbf{WL} & \textbf{Ensemble} \\
+\midrule
+Overall (28) & 82.1\% & 82.1\% & 82.1\% & 78.6\% & \textbf{85.7\%} \\
+Internal (20) & 80.0\% & 80.0\% & 75.0\% & 85.0\% & \textbf{85.0\%} \\
+External (8) & 87.5\% & 87.5\% & 100\% & 62.5\% & \textbf{87.5\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Analysis by Fault Resistance}
+
+Table~\ref{tab:resistance_analysis} presents ensemble accuracy stratified by fault resistance, revealing critical performance characteristics.
+
+\begin{table}[!t]
+\centering
+\caption{Ensemble Accuracy by Fault Resistance}
+\label{tab:resistance_analysis}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Fault Resistance} & \textbf{Cases} & \textbf{Correct} & \textbf{Accuracy} \\
+\midrule
+0 $\Omega$ (Metallic) & 7 & 4 & 57.1\% \\
+200 $\Omega$ & 7 & 7 & 100\% \\
+400 $\Omega$ & 7 & 7 & 100\% \\
+600 $\Omega$ & 7 & 6 & 85.7\% \\
+\midrule
+\textbf{Overall} & \textbf{28} & \textbf{24} & \textbf{85.7\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A notable finding is that the ensemble performs better on high-resistance faults (200--600 $\Omega$) than on metallic faults (0 $\Omega$). This counterintuitive result occurs because metallic faults at zone boundaries (50 km, 200 km) produce ROCOTW signatures that closely resemble external fault patterns due to wave reflection dynamics. The normalization process, while essential for fault resistance tolerance, removes amplitude information that could distinguish these boundary cases.
+
+\subsubsection{Voting Pattern Analysis}
+
+The relationship between voting unanimity and classification accuracy is shown in Table~\ref{tab:voting_patterns}.
+
+\begin{table}[!t]
+\centering
+\caption{Ensemble Accuracy by Voting Pattern}
+\label{tab:voting_patterns}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Voting Pattern} & \textbf{Cases} & \textbf{Correct} & \textbf{Accuracy} \\
+\midrule
+Unanimous (4-0) & 17 & 16 & 94.1\% \\
+Majority (3-1) & 9 & 7 & 77.8\% \\
+Split (2-2) & 2 & 1 & 50.0\% \\
+\midrule
+\textbf{Total} & \textbf{28} & \textbf{24} & \textbf{85.7\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+When all four methods agree (unanimous voting), the ensemble achieves 94.1\% accuracy, demonstrating high reliability for clear-cut cases. The majority voting (3-1) still maintains 77.8\% accuracy, while tied votes (2-2) result in uncertain classification with only 50\% accuracy.
+
+\subsubsection{Confidence Level Reliability}
+
+The ensemble confidence assessment proves to be a reliable indicator of classification certainty:
+
+\begin{itemize}
+    \item \textbf{HIGH confidence:} 17/18 correct (94.4\%)
+    \item \textbf{MEDIUM confidence:} 5/7 correct (71.4\%)
+    \item \textbf{LOW confidence:} 2/3 correct (66.7\%)
+\end{itemize}
+
+This correlation between confidence level and accuracy enables the protection system to flag uncertain cases for operator review or apply conservative trip logic.
+
+\subsubsection{Misclassification Analysis}
+
+Four cases were misclassified by the ensemble:
+
+\begin{enumerate}
+    \item \textbf{Internal 50 km, 0 $\Omega$:} All four methods incorrectly classified this near-boundary fault as external. The proximity to the protection zone boundary combined with metallic fault characteristics produced an external-like ROCOTW signature.
+    
+    \item \textbf{Internal 150 km, 600 $\Omega$:} Three methods (CORR, DTW, WL) classified as external. The high fault resistance significantly attenuated the traveling wave, reducing the characteristic internal fault signature.
+    
+    \item \textbf{Internal 200 km, 0 $\Omega$:} A 2-2 tie resulted in external classification. The mid-line metallic fault created ambiguous patterns that split the method votes.
+    
+    \item \textbf{Forward External, 0 $\Omega$:} Three methods (FD, CORR, WL) incorrectly classified as internal. The metallic forward external fault produced sharp transients similar to internal faults before CLR filtering could attenuate high-frequency components.
+\end{enumerate}
+
+\subsection{Computational Considerations}
+
+The ensemble approach introduces additional computational overhead due to parallel execution of four algorithms. Table~\ref{tab:computational} compares the computational requirements.
+
+\begin{table}[!t]
+\centering
+\caption{Computational Requirements Comparison}
+\label{tab:computational}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Method} & \textbf{Complexity} & \textbf{Typical Time} \\
+\midrule
+Cross-Correlation & $O(n)$ & 0.3 ms \\
+Fréchet Distance & $O(nm)$ & 0.8 ms \\
+DTW & $O(nm)$ with band & 1.2 ms \\
+Wavelet Energy & $O(n \log n)$ & 0.5 ms \\
+\midrule
+\textbf{Ensemble (parallel)} & $O(nm)$ & \textbf{1.5 ms} \\
+\textbf{Ensemble (sequential)} & -- & \textbf{2.8 ms} \\
+\bottomrule
+\end{tabular}
+\\[0.5em]
+\footnotesize{Times measured on Intel i7-10700 @ 2.9 GHz, $n = m = 100$ samples.}
+\end{table}
+
+With parallel execution on modern multi-core processors, the ensemble method completes within 1.5 ms, well within the 2--3 ms protection decision window required for MMC-HVDC systems. Even sequential execution (2.8 ms) remains acceptable for most applications.
+
+\subsection{Summary of Ensemble Method}
+
+The weighted voting ensemble approach successfully combines the complementary strengths of four distinct traveling wave analysis algorithms:
+
+\begin{itemize}
+    \item \textbf{Improved overall accuracy:} 85.7\% vs. best individual method 82.1\%
+    \item \textbf{Balanced performance:} 85.0\% internal and 87.5\% external accuracy
+    \item \textbf{Excellent high-resistance tolerance:} 100\% accuracy at 200--400 $\Omega$
+    \item \textbf{Reliable confidence indication:} 94.4\% accuracy when HIGH confidence
+    \item \textbf{Acceptable computational requirements:} 1.5 ms with parallel execution
+\end{itemize}
+
+The main limitation remains metallic faults at zone boundaries, where all methods struggle due to similar ROCOTW characteristics between internal and external faults. Future work could address this through adaptive reference selection or additional features such as fault location estimation.
+
+% ============================================================================
+% REVISED ABSTRACT
+% ============================================================================
+% Replace the existing abstract with this version:
+
+% ============================================================================
+% SECTION V - CONCLUSION
+% ============================================================================
+
+\section{Conclusion}
+
+This paper has presented a comprehensive comparative analysis of four advanced traveling wave protection methods for MMC-HVDC transmission lines, along with a novel weighted voting ensemble approach. Through systematic evaluation across 28 fault scenarios in a 300~km, $\pm$500~kV bipolar HVDC system simulated in ATP-EMTP, the study provides valuable insights into the strengths, limitations, and optimal application scenarios for each protection algorithm.
+
+\subsection{Key Findings}
+
+\subsubsection{Individual Method Performance}
+
+The four protection algorithms demonstrated distinct performance characteristics:
+
+\begin{enumerate}
+    \item \textbf{Discrete Wavelet Transform (DWT) Energy Distribution:} Achieved 78.6\% overall accuracy with the highest internal fault detection rate (85.0\%) but lowest external fault accuracy (62.5\%). The method excels at capturing high-frequency transient components characteristic of internal faults, making it suitable for dependability-focused applications where missing internal faults carries higher consequences than false trips.
+    
+    \item \textbf{Dynamic Time Warping (DTW):} Achieved 82.1\% overall accuracy with perfect external fault detection (100\%) while maintaining 75.0\% internal fault accuracy. The method's ability to accommodate non-linear time variations makes it ideal for security-focused applications where avoiding unnecessary trips is prioritized.
+    
+    \item \textbf{Cross-Correlation:} Achieved 82.1\% overall accuracy with balanced performance (80.0\% internal, 87.5\% external). The method offers the fastest execution time (0.3~ms) and lowest computational complexity $O(n)$, making it attractive for resource-constrained implementations.
+    
+    \item \textbf{Fréchet Distance:} Achieved 82.1\% overall accuracy with balanced performance identical to correlation. The geometric similarity metric provides intuitive physical interpretation and demonstrated robust fault resistance tolerance up to 600~$\Omega$.
+\end{enumerate}
+
+\subsubsection{Ensemble Method Performance}
+
+The proposed weighted voting ensemble approach achieved superior performance:
+
+\begin{itemize}
+    \item \textbf{Overall accuracy:} 85.7\% (24/28 cases), representing a 3.6 percentage point improvement over the best individual method.
+    
+    \item \textbf{Fault resistance tolerance:} 100\% accuracy for faults with 200--400~$\Omega$ resistance, demonstrating excellent high-impedance fault detection capability.
+    
+    \item \textbf{Confidence reliability:} 94.4\% accuracy when reporting HIGH confidence, enabling reliable operator decision support.
+    
+    \item \textbf{Computational feasibility:} 1.5~ms execution time with parallel processing, well within the 2--3~ms protection decision window.
+\end{itemize}
+
+\subsubsection{Critical Observations}
+
+Several important observations emerged from the analysis:
+
+\begin{enumerate}
+    \item \textbf{Zone boundary challenges:} All methods struggled with metallic faults (0~$\Omega$) at protection zone boundaries (50~km, 200~km), where ROCOTW signatures of internal and external faults become similar due to wave reflection dynamics.
+    
+    \item \textbf{Normalization trade-offs:} While min-max normalization successfully eliminates amplitude variations due to fault resistance, it also removes potentially discriminative magnitude information that could aid classification at zone boundaries.
+    
+    \item \textbf{Complementary error patterns:} The four methods exhibit complementary misclassification patterns, validating the ensemble approach. When one method fails, others often succeed, enabling majority voting to improve overall accuracy.
+    
+    \item \textbf{Confidence correlation:} Ensemble confidence levels strongly correlate with classification accuracy (HIGH: 94.4\%, MEDIUM: 71.4\%, LOW: 66.7\%), providing actionable uncertainty quantification for protection system operators.
+\end{enumerate}
+
+\subsection{Practical Recommendations}
+
+Based on the comprehensive evaluation, the following recommendations are provided for protection engineers:
+
+\subsubsection{Algorithm Selection Guidelines}
+
+\begin{itemize}
+    \item \textbf{For dependability-critical applications} (where missing internal faults is unacceptable): Use DWT energy distribution or the ensemble method with bias toward internal classification.
+    
+    \item \textbf{For security-critical applications} (where false trips cause significant disruption): Use DTW or the ensemble method with conservative trip logic requiring HIGH confidence.
+    
+    \item \textbf{For resource-constrained implementations} (embedded systems with limited processing power): Use cross-correlation, which offers acceptable accuracy (82.1\%) with minimal computational requirements.
+    
+    \item \textbf{For maximum reliability} (critical transmission corridors): Use the ensemble method with all four algorithms, accepting the additional computational overhead for improved accuracy and confidence indication.
+\end{itemize}
+
+\subsubsection{Implementation Considerations}
+
+\begin{itemize}
+    \item \textbf{Reference selection:} Careful selection of internal and external reference patterns significantly impacts classification performance. References should be chosen from representative fault cases at mid-line locations to minimize bias.
+    
+    \item \textbf{Sampling requirements:} All methods require minimum 100~kHz sampling frequency to capture high-frequency traveling wave components. Lower sampling rates will degrade performance, particularly for wavelet-based analysis.
+    
+    \item \textbf{Window duration:} A 1.0~ms post-fault analysis window provides sufficient signal content while maintaining fast operation. Shorter windows may miss important waveform features; longer windows risk including reflected waves that complicate analysis.
+    
+    \item \textbf{Confidence-based logic:} For ensemble implementations, consider implementing tiered response based on confidence level---immediate trip for HIGH confidence, delayed confirmation for MEDIUM, and operator consultation for LOW confidence cases.
+\end{itemize}
+
+\subsection{Limitations}
+
+This study has several limitations that should be acknowledged:
+
+\begin{enumerate}
+    \item \textbf{Simulation-based validation:} All results are based on ATP-EMTP simulations. While the simulation model accurately represents system behavior, real-world validation with field data or hardware-in-the-loop testing would strengthen the conclusions.
+    
+    \item \textbf{Limited fault types:} The study focused on pole-to-ground faults. Extension to pole-to-pole faults and other fault types would provide more comprehensive characterization.
+    
+    \item \textbf{Fixed system parameters:} The analysis used fixed CLR inductance (100~mH) and line length (300~km). Performance may vary for different system configurations.
+    
+    \item \textbf{Noise-free conditions:} The simulations did not include measurement noise or electromagnetic interference. Noise immunity testing would be valuable for practical deployment assessment.
+\end{enumerate}
+
+\subsection{Future Research Directions}
+
+Several promising directions for future research are identified:
+
+\begin{enumerate}
+    \item \textbf{Adaptive reference selection:} Develop methods to automatically select or update reference patterns based on system operating conditions, potentially using online learning techniques to improve classification accuracy over time.
+    
+    \item \textbf{Machine learning integration:} Explore deep learning approaches (convolutional neural networks, recurrent neural networks) trained on large fault databases to potentially exceed the accuracy of traditional signal processing methods.
+    
+    \item \textbf{Multi-terminal extension:} Extend the comparative analysis to multi-terminal HVDC grids, where fault location and isolation present additional challenges due to multiple possible fault paths.
+    
+    \item \textbf{Hybrid time-frequency features:} Investigate combined feature extraction using both time-domain (DTW, Fréchet) and frequency-domain (wavelet) characteristics to improve zone boundary discrimination.
+    
+    \item \textbf{Hardware implementation:} Develop FPGA or DSP implementations of the ensemble algorithm to validate real-time performance and assess practical deployment feasibility.
+    
+    \item \textbf{Noise robustness analysis:} Conduct comprehensive noise immunity testing with various SNR levels and interference types to establish practical operating limits for each method.
+    
+    \item \textbf{Fault location integration:} Combine fault classification with fault location estimation to provide comprehensive protection functionality and potentially improve classification accuracy through location-aware reference selection.
+\end{enumerate}
+
+\subsection{Concluding Remarks}
+
+This comparative study demonstrates that advanced traveling wave protection methods offer viable solutions for MMC-HVDC transmission line protection, with each algorithm presenting distinct trade-offs between accuracy, computational complexity, and robustness to different fault conditions. The proposed weighted voting ensemble approach successfully leverages the complementary strengths of individual methods to achieve superior overall performance.
+
+The key contribution of this work lies not only in the quantitative performance comparison but also in providing practical guidance for protection engineers selecting algorithms for specific applications. As HVDC transmission continues to expand globally for renewable energy integration and long-distance power transmission, the insights from this study will help ensure reliable and fast-acting protection systems that maintain grid stability while minimizing unnecessary outages.
+
+The ensemble methodology presented here represents a promising direction for protection system design, demonstrating that intelligent combination of multiple algorithms can exceed the performance of any single method. Future research building on these findings, particularly in areas of adaptive learning and hardware implementation, will further advance the state of HVDC protection technology.
+
+% References section (to be filled)
+\begin{thebibliography}{99}
+
+\bibitem{reference_paper_frechet}
+H. Qin, F. Peng, Z. Pan, Y. Zhong, T. Liu, and R. Cao, ``A single-ended protection scheme for flexible HVdc transmission lines based on the Fréchet distance of the rate of change of fault voltage traveling waves,'' \emph{IEEE Access}, vol. 13, pp. 128716--128728, 2025.
+
+\bibitem{reference1}
+S. Yang, W. Xiang, X. Lu, W. Zuo, and J. Wen, ``An adaptive reclosing strategy for MMC-HVDC systems with hybrid DC circuit breakers,'' \emph{IEEE Trans. Power Del.}, vol. 35, no. 3, pp. 1111--1123, Jun. 2020.
+
+\bibitem{reference2}
+O. Gomis-Bellmunt, J. Sau-Bassols, E. Prieto-Araujo, and M. Cheah-Mane, ``Flexible converters for meshed HVDC grids: From flexible AC transmission systems (FACTS) to flexible DC grids,'' \emph{IEEE Trans. Power Del.}, vol. 35, no. 1, pp. 2--15, Feb. 2020.
+
+\bibitem{reference3}
+C. Zhang, G. Song, T. Wang, and X. Dong, ``An improved non-unit traveling wave protection method with adaptive threshold value and its application in HVDC grids,'' \emph{IEEE Trans. Power Del.}, vol. 35, no. 4, pp. 1800--1811, Aug. 2020.
+
+\bibitem{wavelet1}
+K. De Kerf, K. Srivastava, M. Reza, D. Bekaert, S. Cole, D. Van Hertem, and R. Belmans, ``Wavelet-based protection strategy for DC faults in multi-terminal VSC HVDC systems,'' \emph{IET Gener. Transm. Distrib.}, vol. 5, no. 4, pp. 496--503, 2011.
+
+\bibitem{wavelet2}
+L. Tang and B. T. Ooi, ``Locating and isolating DC faults in multi-terminal DC systems,'' \emph{IEEE Trans. Power Del.}, vol. 22, no. 3, pp. 1877--1884, Jul. 2007.
+
+\bibitem{dtw1}
+T. Lan, Y. Li, and X. Duan, ``High fault-resistance tolerable traveling wave protection for multi-terminal VSC-HVDC,'' \emph{IEEE Trans. Power Del.}, vol. 36, no. 2, pp. 943--956, Apr. 2021.
+
+\bibitem{pattern1}
+C. Zhang, Y. Li, G. Song, and X. Dong, ``Fast and sensitive non-unit protection method for HVDC grids using Levenberg–Marquardt algorithm,'' \emph{IEEE Trans. Ind. Electron.}, vol. 69, no. 9, pp. 9064--9074, Sep. 2022.
+
+\bibitem{pattern2}
+H. Li, H. Jiang, Y. Liang, Y. Xu, and G. Wang, ``Non-unit traveling wave protection for flexible HVDC lines based on the ratio of the waveform fitting residual,'' \emph{Electr. Power Syst. Res.}, vol. 218, May 2023, Art. no. 109199.
+
+\bibitem{marti1982accurate}
+J. R. Marti, ``Accurate modelling of frequency-dependent transmission lines in electromagnetic transient simulations,'' \emph{IEEE Trans. Power App. Syst.}, vol. PAS-101, no. 1, pp. 147--157, Jan. 1982.
+
+\bibitem{daubechies1992}
+I. Daubechies, \emph{Ten Lectures on Wavelets}. Philadelphia, PA, USA: SIAM, 1992.
+
+\bibitem{wavelet_power_systems}
+A. M. Gaouda, M. M. A. Salama, M. R. Sultan, and A. Y. Chikhani, ``Power quality detection and classification using wavelet-multiresolution signal decomposition,'' \emph{IEEE Trans. Power Del.}, vol. 14, no. 4, pp. 1469--1476, Oct. 1999.
+
+\end{thebibliography}
+
+\end{document}
