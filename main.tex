@@ -41,15 +41,15 @@ HVDC transmission, fault protection, traveling wave, discrete wavelet transform,
 % Introduction
 \section{Introduction}
 
-\IEEEPARstart{F}{lexible} High Voltage Direct Current (HVDC) transmission technology based on Modular Multilevel Converters (MMC) has become increasingly critical for modern power systems, enabling efficient long-distance bulk power transmission, integration of renewable energy, and interconnection of asynchronous networks \cite{reference_paper_frechet}. The advantages of MMC-HVDC systems include bidirectional power flow capability, low harmonic distortion, black-start capability, and the absence of commutation failure issues characteristic of conventional line-commutated converter (LCC) HVDC systems. However, these advantages come with significant protection challenges.
+\IEEEPARstart{F}{lexible} HVDC transmission technology based on Modular Multilevel Converters (MMC) has become increasingly critical for modern power systems, enabling efficient long-distance bulk power transmission, integration of renewable energy, and interconnection of asynchronous networks \cite{reference_paper_frechet}. The advantages of MMC-HVDC systems include bidirectional power flow capability, low harmonic distortion, black-start capability, and the absence of commutation failure issues characteristic of conventional line-commutated converter (LCC) HVDC systems. However, these advantages come with significant protection challenges.
 
-Unlike traditional AC systems or conventional thyristor-based line-commutated converter (LCC) HVDC systems, MMC-HVDC grids exhibit unique fault characteristics that complicate protection design. When a DC fault occurs, the small damping and low impedance of DC networks result in extremely rapid fault current rise rates (typically $di/dt > 10$ kA/ms), with peak currents reaching several tens of kiloamperes within milliseconds. The submodule capacitors in MMC stations rapidly discharge into the fault location, contributing to the fault current even after converter blocking. These characteristics demand ultra-fast fault detection and isolation mechanisms, typically requiring operation within 2-3 ms to prevent equipment damage and maintain system stability \cite{reference1, reference2}.
+Unlike traditional AC systems or conventional thyristor-based LCC HVDC systems, MMC-HVDC grids exhibit unique fault characteristics that complicate protection design. When a DC fault occurs, the small damping and low impedance of DC networks result in extremely rapid fault current rise rates (typically $di/dt > 10$ kA/ms), with peak currents reaching several tens of kiloamperes within milliseconds. The submodule capacitors in MMC stations rapidly discharge into the fault location, contributing to the fault current even after converter blocking. These characteristics demand ultra-fast fault detection and isolation mechanisms, typically requiring operation within 2-3 ms to prevent equipment damage and maintain system stability \cite{reference1, reference2}.
 
 
 
 \subsection{Background and Motivation}
 
-Traveling wave (TW) based protection schemes have emerged as the predominant solution for HVDC transmission line protection due to their inherent speed advantages. Commercial protection systems from ABB and Siemens utilize TW derivatives (du/dt or dP/dt) as primary fault indicators \cite{reference3}. However, these conventional approaches face several critical limitations:
+TW-based protection schemes have emerged as the predominant solution for HVDC transmission line protection due to their inherent speed advantages. Commercial protection systems from ABB and Siemens utilize TW derivatives (du/dt or dP/dt) as primary fault indicators \cite{reference3}. However, these conventional approaches face several critical limitations:
 
 \begin{itemize}
     \item \textbf{Limited fault resistance tolerance:} Derivative-based methods sacrifice sensitivity to high-resistance faults to maintain selectivity, resulting in protection blind zones for internal faults with resistance exceeding 300-400 $\Omega$.
@@ -75,7 +75,7 @@ Recent research on HVDC protection can be categorized based on the signal proces
 
 \textbf{Wavelet-based methods:} Discrete Wavelet Transform (DWT) has been widely applied for transient signal analysis in power systems. The multi-resolution analysis capability of wavelets enables simultaneous time-frequency localization, making it suitable for detecting abrupt changes in traveling waves. Studies have demonstrated that wavelet-based methods can effectively capture fault transient characteristics through energy distribution across decomposition levels \cite{wavelet1, wavelet2}. Energy-based approaches analyze the distribution of signal energy across detail coefficients at different scales, where internal faults exhibit concentrated high-frequency energy (dominant energy in fine-scale details D1-D2) due to sharp wavefronts, while external faults show energy shift toward coarser scales (D3-D4) due to current-limiting reactor filtering effects. Classification is performed by comparing the normalized energy distribution vector of the measured fault signal against reference patterns using Euclidean distance metrics. This energy-based approach offers computational efficiency and robustness to amplitude variations when combined with proper normalization.
 
-\textbf{Pattern matching approaches:} Dynamic Time Warping (DTW) and Fréchet distance have been recently introduced to HVDC protection. DTW calculates the optimal alignment between two temporal sequences, accommodating non-linear time variations and making it robust to wave propagation speed uncertainties \cite{dtw1}. The Fréchet distance method, as proposed in \cite{reference_paper_frechet}, measures the similarity between the Rate of Change of Traveling Wave (ROCOTW) curves, demonstrating excellent fault resistance tolerance up to 600 $\Omega$. These geometric similarity metrics offer intuitive physical interpretation and inherent normalization properties.
+\textbf{Pattern matching approaches:} DTW and Fréchet distance have been recently introduced to HVDC protection. DTW calculates the optimal alignment between two temporal sequences, accommodating non-linear time variations and making it robust to wave propagation speed uncertainties \cite{dtw1}. The Fréchet distance method, as proposed in \cite{reference_paper_frechet}, measures the similarity between ROCOTW curves, demonstrating excellent fault resistance tolerance up to 600 $\Omega$. These geometric similarity metrics offer intuitive physical interpretation and inherent normalization properties.
 
 \textbf{Correlation-based schemes:} Cross-correlation analysis provides a computationally efficient means of pattern matching, with established theoretical foundations in signal processing. Pearson correlation coefficients quantify the linear relationship between measured and reference waveforms, offering simplicity and fast execution. However, sensitivity to amplitude scaling and time-shift variations may limit performance in certain scenarios.
 
@@ -125,7 +125,7 @@ The test system employed in this study is a symmetrical bipolar two-terminal MMC
     \item Rated DC voltage: $\pm$500 kV
     \item Transmission line length: 300 km (overhead line)
     \item Converter stations: MMC1 (rectifier) and MMC2 (inverter)
-    \item Current-limiting reactors (CLRs): 100 mH at each terminal
+    \item CLRs: 100 mH at each terminal
     \item System configuration: Symmetrical bipolar with metallic return
 \end{itemize}
 
@@ -383,7 +383,7 @@ C &= \frac{L_{dc}}{Z_{C1}(L_{dc} - Z_{C1}\tau_1 l)} \\
 
 \textbf{Key characteristic:} For external faults, the backward traveling wave voltage exhibits a \textbf{slow, gradual decline} due to CLR filtering. The rate of change shows a \textbf{moderate initial peak with slow decay}, distinctly different from internal faults.
 
-\subsection{Rate of Change of Traveling Wave (ROCOTW)}
+\subsection{ROCOTW}
 
 The rate of change of the backward traveling wave voltage, denoted as ROCOTW, is defined as:
 
@@ -498,11 +498,11 @@ This normalization ensures that pattern matching focuses on waveform shape rathe
 % Algorithm 1 - Discrete Wavelet Transform with Energy Distribution Analysis
 % ============================================================================
 
-\subsection{Algorithm 1: Discrete Wavelet Transform with Energy Distribution Analysis}
+\subsection{Algorithm 1: DWT with Energy Distribution Analysis}
 
 \subsubsection{Mathematical Foundation}
 
-The Discrete Wavelet Transform (DWT) decomposes a signal into approximation and detail coefficients at multiple resolution levels:
+The DWT decomposes a signal into approximation and detail coefficients at multiple resolution levels:
 
 \begin{equation}
 \text{DWT}(u_{b1}) = [cA_J, cD_J, cD_{J-1}, \ldots, cD_1]
@@ -556,7 +556,7 @@ The fault type is determined by the minimum distance:
 
 \subsubsection{Reference Curve Establishment for Wavelet Method}
 
-A key enhancement in the updated implementation is the introduction of dedicated ROCOTW reference curves for the Wavelet (WL) method. In addition to the energy-vector comparison, the WL method now employs two reference ROCOTW signatures as supplementary classification templates:
+A key enhancement in the updated implementation is the introduction of dedicated ROCOTW reference curves for the WL method. In addition to the energy-vector comparison, the WL method now employs two reference ROCOTW signatures as supplementary classification templates:
 
 \begin{itemize}
     \item \textbf{Internal reference} $(\mathbf{W}_{int}^{ref})$: Derived from a metallic pole-to-ground fault at 150 km, capturing the high-amplitude, broad-profile ROCOTW signature characteristic of close-in internal faults with sharp wavefronts.
@@ -592,22 +592,16 @@ where $\alpha_E = 0.5$ balances the energy-vector and ROCOTW contributions.
     \label{fig:energy_vectors}
 \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.85\columnwidth]{Wavelet.png}
-    \caption{Normalized ROCOTW reference curves used in the Wavelet (WL) method. The internal reference (green, square markers) shows a broad sustained high-amplitude profile, while the external reference (red, square markers, $R_f=100~\Omega$) exhibits the attenuated, rapidly-decaying signature after CLR filtering. These curves serve as supplementary templates alongside the energy vector comparison.}
-    \label{fig:reference_curves_wl}
-\end{figure}
 
 % ============================================================================
 % Algorithm 2 - Dynamic Time Warping Distance Metric
 % ============================================================================
 
-\subsection{Algorithm 2: Dynamic Time Warping Distance Metric}
+\subsection{Algorithm 2: DTW Distance Metric}
 
 \subsubsection{Mathematical Foundation}
 
-Dynamic Time Warping (DTW) computes the optimal alignment between two time series by allowing non-linear time-axis warping. The DTW cost matrix $D(i,j)$ is computed recursively using the \textit{symmetric-2 step pattern}:
+DTW computes the optimal alignment between two time series by allowing non-linear time-axis warping. The DTW cost matrix $D(i,j)$ is computed recursively using the \textit{symmetric-2 step pattern}:
 
 \begin{equation}
 D(i,j) = d(x_i, y_j) + \min\begin{cases}
@@ -662,8 +656,8 @@ For a measured ROCOTW pattern, DTW distances to both references are computed, an
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\columnwidth]{fig_reference_curves.png}
-    \caption{Normalized ROCOTW reference curves used for DTW analysis. The internal reference (green) shows a broad sustained profile, while the external reference (red) exhibits a pronounced secondary oscillation due to wave reflections at the protection zone boundary.}
-    \label{fig:reference_curves_dtw}
+    \caption{Normalized ROCOTW reference curves used for DTW, Cross-Correlation, and Fréchet Distance analysis. The internal reference (green) shows a broad sustained profile, while the external reference (red) exhibits a pronounced secondary oscillation due to wave reflections at the protection zone boundary.}
+    \label{fig:reference_curves}
 \end{figure}
 
 % ============================================================================
@@ -709,12 +703,7 @@ Classification is based on maximum correlation:
 \item External reference: Forward fault with $R_f = 0~\Omega$
 \end{itemize}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.85\columnwidth]{fig_reference_curves_corr.png}
-    \caption{Normalized ROCOTW reference curves used for correlation analysis. The internal reference (green, square markers) and external reference (red, square markers) illustrate the distinct morphological signatures used as templates for zero-lag cross-correlation classification.}
-    \label{fig:reference_curves_corr}
-\end{figure}
+The same ROCOTW reference curves shown in Fig.~\ref{fig:reference_curves} are used as templates for zero-lag cross-correlation classification, with the internal reference (green) and external reference (red) illustrating the distinct morphological signatures.
 
 % ============================================================================
 % Algorithm 4 - Fréchet Distance of ROCOTW Curves
@@ -767,12 +756,6 @@ Two reference ROCOTW signatures are established from representative fault cases 
 
 Fig.~\ref{fig:reference_curves} illustrates the normalized reference curves, highlighting the distinct morphological differences between internal and external fault signatures. The internal reference exhibits a broader profile with sustained amplitude, while the external reference demonstrates rapid attenuation characteristic of reflected traveling waves at the protection zone boundary.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.75\columnwidth]{Figure_1.png}
-    \caption{Normalized ROCOTW reference curves for internal fault at 150 km  200$\Omega$ and external 200$\Omega$ forward fault.}
-    \label{fig:reference_curves}
-\end{figure}
 
 \subsubsection{Signal Processing Pipeline}
 
@@ -881,7 +864,7 @@ Table~\ref{tab:fd_parameters} summarizes the key parameters used in the Fréchet
 
 \subsection{Comprehensive Experimental Results}
 
-Table~\ref{tab:all_results} presents the complete classification results for all four algorithms across 42 fault scenarios (internal faults at five locations with six resistance levels: 0, 100, 200, 400, 600, 750~$\Omega$; and forward and reverse external faults at the same resistance levels), enabling direct performance comparison. The Wavelet (WL) method uses the updated reference curve ($R_f = 100~\Omega$ external reference) as described in Section~\ref{subsec:alg1_impl}.
+Table~\ref{tab:all_results} presents the complete classification results for all four algorithms across 42 fault scenarios (internal faults at five locations with six resistance levels: 0, 100, 200, 400, 600, 750~$\Omega$; and forward and reverse external faults at the same resistance levels), enabling direct performance comparison. The WL method uses the updated reference curve ($R_f = 100~\Omega$ external reference) as described in Section~\ref{subsec:alg1_impl}.
 
 \begin{table*}[!t]
 \centering
@@ -1378,7 +1361,7 @@ The four protection algorithms demonstrated distinct performance characteristics
 \begin{enumerate}
     \item \textbf{WL (Fin/Fout) with Updated Reference Curve:} Achieved 81.0\% overall accuracy (76.7\% internal, 91.7\% external). The Fin/Fout wavelet energy ratio correctly handled reverse external faults and improved balanced performance across both fault categories.
 
-    \item \textbf{Dynamic Time Warping (DTW):} Achieved 71.4\% overall accuracy with 63.3\% internal and 91.7\% external fault accuracy. DTW struggled at near-boundary locations (50~km, 100~km) and at higher fault resistances (250~km cases), limiting its individual performance on this dataset.
+    \item \textbf{DTW:} Achieved 71.4\% overall accuracy with 63.3\% internal and 91.7\% external fault accuracy. DTW struggled at near-boundary locations (50~km, 100~km) and at higher fault resistances (250~km cases), limiting its individual performance on this dataset.
 
     \item \textbf{Cross-Correlation:} Achieved 81.0\% overall accuracy with strong external fault detection (91.7\%) and reasonable internal accuracy (76.7\%). The method offers the fastest execution time (0.3~ms) and lowest computational complexity $O(n)$, making it attractive for resource-constrained implementations.
 
