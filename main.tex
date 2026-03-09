@@ -12,6 +12,8 @@
 \usepackage{booktabs}
 \usepackage{colortbl}
 \usepackage{hyperref}
+\usepackage[all]{hypcap}
+\hypersetup{hidelinks}
 
 % Color helpers for T/F cells in tables
 \newcommand{\TT}{\cellcolor{green!25}T}
@@ -46,9 +48,9 @@ HVDC transmission, fault protection, traveling wave, discrete wavelet transform,
 % Introduction
 \section{Introduction}
 
-\IEEEPARstart{F}{lexible} HVDC transmission technology based on Modular Multilevel Converters (MMC) has become increasingly critical for modern power systems, enabling efficient long-distance bulk power transmission, integration of renewable energy, and interconnection of asynchronous networks \cite{reference_paper_frechet}. The advantages of MMC-HVDC systems include bidirectional power flow capability, low harmonic distortion, black-start capability, and the absence of commutation failure issues characteristic of conventional line-commutated converter (LCC) HVDC systems. However, these advantages come with significant protection challenges.
+\IEEEPARstart{F}{lexible} HVDC transmission technology based on Modular Multilevel Converters (MMC) has become increasingly critical for modern power systems, enabling efficient long-distance bulk power transmission, integration of renewable energy, and interconnection of asynchronous networks \cite{reference_paper_frechet, debnath2015, perez2015}. The advantages of MMC-HVDC systems include bidirectional power flow capability, low harmonic distortion, black-start capability, and the absence of commutation failure issues characteristic of conventional line-commutated converter (LCC) HVDC systems. However, these advantages come with significant protection challenges.
 
-Unlike traditional AC systems or conventional thyristor-based LCC HVDC systems, MMC-HVDC grids exhibit unique fault characteristics that complicate protection design. When a DC fault occurs, the small damping and low impedance of DC networks result in extremely rapid fault current rise rates (typically $di/dt > 10$ kA/ms), with peak currents reaching several tens of kiloamperes within milliseconds. The submodule capacitors in MMC stations rapidly discharge into the fault location, contributing to the fault current even after converter blocking. These characteristics demand ultra-fast fault detection and isolation mechanisms, typically requiring operation within 2-3 ms to prevent equipment damage and maintain system stability \cite{reference1, reference2}.
+Unlike traditional AC systems or conventional thyristor-based LCC HVDC systems, MMC-HVDC grids exhibit unique fault characteristics that complicate protection design. When a DC fault occurs, the small damping and low impedance of DC networks result in extremely rapid fault current rise rates (typically $di/dt > 10$ kA/ms), with peak currents reaching several tens of kiloamperes within milliseconds. The submodule capacitors in MMC stations rapidly discharge into the fault location, contributing to the fault current even after converter blocking. These characteristics demand ultra-fast fault detection and isolation mechanisms, typically requiring operation within 2-3 ms to prevent equipment damage and maintain system stability \cite{reference1, reference2, sneath2016, yang2010}.
 
 
 
@@ -145,7 +147,7 @@ The protection relay M is located at the MMC1 terminal. Three representative fau
 
 \subsection{MMC Station Equivalent Model}
 
-Each MMC station consists of six converter arms (three phases, upper and lower arms), with each arm containing N series-connected half-bridge submodules. For traveling wave analysis during the initial fault transient (before control system response), the MMC can be represented by an equivalent RLC circuit \cite{reference_paper_frechet}.
+Each MMC station consists of six converter arms (three phases, upper and lower arms), with each arm containing N series-connected half-bridge submodules. For traveling wave analysis during the initial fault transient (before control system response), the MMC can be represented by an equivalent RLC circuit \cite{reference_paper_frechet, debnath2015, tu2011}.
 
 The submodule capacitance equivalence is derived from energy conservation principles. Assuming identical submodule capacitor voltages $U_{sm}$ and capacitance $C_{sm}$, the total stored energy in one phase equals:
 
@@ -179,7 +181,7 @@ This equivalent model accurately represents the MMC behavior during the first tr
 
 \subsection{DC Transmission Line Model}
 
-The DC overhead transmission line is modeled using the J. Marti frequency-dependent transmission line model \cite{marti1982accurate}, implemented in ATP-EMTP. This model accurately represents frequency-dependent effects including skin effect, ground return path variations, and distributed parameter behavior across a wide frequency range (0.001 Hz to 1 MHz).
+The DC overhead transmission line is modeled using the J. Marti frequency-dependent transmission line model \cite{marti1982accurate}, implemented in ATP-EMTP, which is based on the Bergeron method for traveling wave propagation \cite{dommel1969}. This model accurately represents frequency-dependent effects including skin effect, ground return path variations, and distributed parameter behavior across a wide frequency range (0.001 Hz to 1 MHz).
 
 The 300 km transmission line is divided into six series-connected 50 km segments, with controllable switches at each junction to facilitate systematic fault testing at various locations (50 km, 100 km, 150 km, 200 km, and 250 km from the relay location).
 
@@ -196,7 +198,7 @@ The bipolar HVDC line consists of two overhead conductors with the following spe
 
 \subsubsection{Kellenberger Transformation and Mode Decomposition}
 
-Due to electromagnetic coupling between the positive and negative poles of the bipolar DC transmission line, analysis in the phase domain is complex. The Kellenberger (Clarke) transformation decouples the system into independent line-mode and zero-mode components:
+Due to electromagnetic coupling between the positive and negative poles of the bipolar DC transmission line, analysis in the phase domain is complex. The Kellenberger (Clarke) transformation decouples the system into independent line-mode and zero-mode components \cite{reference_paper_frechet, dommel1969}:
 
 \begin{equation}
 \begin{bmatrix}
@@ -392,7 +394,7 @@ C &= \frac{L_{dc}}{Z_{C1}(L_{dc} - Z_{C1}\tau_1 l)} \\
 
 \subsection{ROCOTW}
 
-The rate of change of the backward traveling wave voltage, denoted as ROCOTW, is defined as:
+The rate of change of the backward traveling wave voltage, denoted as ROCOTW \cite{sneath2016, reference_paper_frechet}, is defined as:
 
 \begin{equation}
 \text{ROCOTW}(t) = \frac{dU_{b1}(t)}{dt}
@@ -483,7 +485,7 @@ where $\mu_{baseline}$ and $\sigma_{baseline}$ are the mean and standard deviati
 
 \subsubsection{ROCOTW Calculation}
 
-The Rate of Change of Traveling Wave is computed using Savitzky-Golay filtering, which provides smoothed derivative estimation while preserving edge sharpness:
+The Rate of Change of Traveling Wave is computed using Savitzky-Golay filtering \cite{savitzky1964}, which provides smoothed derivative estimation while preserving edge sharpness:
 
 \begin{equation}
 \text{ROCOTW}[n] = \text{SavGol}\left(U_{b1}[n], w=11, p=3, d=1\right)
@@ -608,7 +610,7 @@ where $\alpha_E = 0.5$ balances the energy-vector and ROCOTW contributions.
 
 \subsubsection{Mathematical Foundation}
 
-DTW computes the optimal alignment between two time series by allowing non-linear time-axis warping. The DTW cost matrix $D(i,j)$ is computed recursively using the \textit{symmetric-2 step pattern}:
+DTW computes the optimal alignment between two time series by allowing non-linear time-axis warping \cite{sakoe1978, dtw1}. The DTW cost matrix $D(i,j)$ is computed recursively using the \textit{symmetric-2 step pattern}:
 
 \begin{equation}
 D(i,j) = d(x_i, y_j) + \min\begin{cases}
@@ -622,7 +624,7 @@ with boundary conditions $D(0,0) = 0$ and $D(i,0) = D(0,j) = \infty$, where $d(x
 
 \subsubsection{Sakoe-Chiba Band Constraint}
 
-To improve computational efficiency and prevent pathological alignments, a Sakoe-Chiba band constraint is applied:
+To improve computational efficiency and prevent pathological alignments, a Sakoe-Chiba band constraint is applied \cite{sakoe1978}:
 
 \begin{equation}
 |i - j| \leq w, \quad w = \max(5, \lfloor 0.1 \cdot \max(n,m) \rfloor)
@@ -728,7 +730,7 @@ The same ROCOTW reference curves shown in Fig.~\ref{fig:reference_curves} are us
 
 \subsection{Algorithm 4: Fréchet Distance-Based ROCOTW Classification}
 
-The Fréchet distance provides a robust metric for comparing traveling wave signatures by accounting for both shape similarity and temporal ordering. Unlike point-wise distance measures, the Fréchet distance captures the overall geometric correspondence between curves, making it particularly suitable for fault classification where waveform morphology is the discriminating feature.
+The Fréchet distance provides a robust metric for comparing traveling wave signatures by accounting for both shape similarity and temporal ordering \cite{eiter1994, reference_paper_frechet}. Unlike point-wise distance measures, the Fréchet distance captures the overall geometric correspondence between curves, making it particularly suitable for fault classification where waveform morphology is the discriminating feature.
 
 \subsubsection{Mathematical Foundation}
 
@@ -1507,6 +1509,33 @@ I. Daubechies, \emph{Ten Lectures on Wavelets}. Philadelphia, PA, USA: SIAM, 199
 
 \bibitem{wavelet_power_systems}
 A. M. Gaouda, M. M. A. Salama, M. R. Sultan, and A. Y. Chikhani, ``Power quality detection and classification using wavelet-multiresolution signal decomposition,'' \emph{IEEE Trans. Power Del.}, vol. 14, no. 4, pp. 1469--1476, Oct. 1999.
+
+\bibitem{sakoe1978}
+H. Sakoe and S. Chiba, ``Dynamic programming algorithm optimization for spoken word recognition,'' \emph{IEEE Trans. Acoust., Speech, Signal Process.}, vol. ASSP-26, no. 1, pp. 43--49, Feb. 1978.
+
+\bibitem{dommel1969}
+H. W. Dommel, ``Digital computer solution of electromagnetic transients in single- and multiphase networks,'' \emph{IEEE Trans. Power App. Syst.}, vol. PAS-88, no. 4, pp. 388--399, Apr. 1969.
+
+\bibitem{sneath2016}
+J. Sneath and A. D. Rajapakse, ``Fault detection and interruption in an earthed HVDC grid using ROCOV and hybrid DC breakers,'' \emph{IEEE Trans. Power Del.}, vol. 31, no. 3, pp. 973--981, Jun. 2016.
+
+\bibitem{debnath2015}
+S. Debnath, J. Qin, B. Bahrani, M. Saeedifard, and P. Barbosa, ``Operation, control, and applications of the modular multilevel converter: A review,'' \emph{IEEE Trans. Power Electron.}, vol. 30, no. 1, pp. 37--53, Jan. 2015.
+
+\bibitem{perez2015}
+M. A. Perez, S. Bernet, J. Rodriguez, S. Kouro, and R. Lizana, ``Circuit topologies, modeling, control schemes, and applications of modular multilevel converters,'' \emph{IEEE Trans. Power Electron.}, vol. 30, no. 1, pp. 4--17, Jan. 2015.
+
+\bibitem{tu2011}
+Q. Tu, Z. Xu, and L. Xu, ``Reduced switching-frequency modulation and circulating current suppression for modular multilevel converters,'' \emph{IEEE Trans. Power Del.}, vol. 26, no. 3, pp. 2009--2017, Jul. 2011.
+
+\bibitem{yang2010}
+J. Yang, J. E. Fletcher, and J. O'Reilly, ``Multiterminal DC wind farm collection grid internal fault analysis and protection design,'' \emph{IEEE Trans. Power Del.}, vol. 25, no. 4, pp. 2308--2318, Oct. 2010.
+
+\bibitem{savitzky1964}
+A. Savitzky and M. J. E. Golay, ``Smoothing and differentiation of data by simplified least squares procedures,'' \emph{Anal. Chem.}, vol. 36, no. 8, pp. 1627--1639, 1964.
+
+\bibitem{eiter1994}
+T. Eiter and H. Mannila, ``Computing discrete Fr\'{e}chet distance,'' Tech. Rep. CD-TR 94/64, Christian Doppler Laboratory for Expert Systems, TU Vienna, Austria, 1994.
 
 \end{thebibliography}
 
