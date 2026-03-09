@@ -10,7 +10,12 @@
 \usepackage[table]{xcolor}
 \usepackage{multirow}
 \usepackage{booktabs}
+\usepackage{colortbl}
 \usepackage{hyperref}
+
+% Color helpers for T/F cells in tables
+\newcommand{\TT}{\cellcolor{green!25}T}
+\newcommand{\FF}{\cellcolor{red!25}F}
 
 % Correct hyphenation
 \hyphenation{op-tical net-works semi-conduc-tor}
@@ -1113,10 +1118,6 @@ Fig.~\ref{fig:ensemble_architecture} illustrates the ensemble protection system 
 \subsection{Experimental Results}
 
 The ensemble method was evaluated on the same 42 fault scenarios used for individual algorithm testing. Table~\ref{tab:ensemble_results} presents the complete ensemble classification results with individual method contributions.
-
-% Color helpers for T/F cells
-\newcommand{\TT}{\cellcolor{green!25}T}
-\newcommand{\FF}{\cellcolor{red!25}F}
 
 \begin{table*}[!t]
 \centering
