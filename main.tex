@@ -1207,6 +1207,7 @@ Table~\ref{tab:accuracy_comparison} summarizes the comparative accuracy across d
 \centering
 \caption{Accuracy Comparison: Individual Methods vs. Ensemble (42 Cases)}
 \label{tab:accuracy_comparison}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 \textbf{Category} & \textbf{Corr.} & \textbf{DTW} & \textbf{TW (Dist)} & \textbf{WL (Fin/Fout)} & \textbf{Ensemble} \\
@@ -1215,7 +1216,8 @@ Overall (42)  & 81.0\% & 71.4\% & 83.3\% & 81.0\% & \textbf{85.7\%} \\
 Internal (30) & 76.7\% & 63.3\% & 93.3\% & 76.7\% & \textbf{83.3\%} \\
 External (12) & 91.7\% & 91.7\% & 58.3\% & 91.7\% & \textbf{91.7\%} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \\[0.5em]
 \footnotesize{Corr.\ = Cross-Correlation, TW (Dist) = Traveling Wave Distance, WL = Wavelet (Fin/Fout). All results from the 42-case ATP-EMTP study.}
 \end{table}
