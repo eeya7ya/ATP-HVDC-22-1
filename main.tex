@@ -145,7 +145,10 @@ The test system employed in this study is a symmetrical bipolar two-terminal MMC
 
 The protection relay M is located at the MMC1 terminal. Three representative fault locations are considered: $f_1$ (internal fault), $f_2$ (forward external fault), and $f_3$ (reverse external fault). All simulations are performed in ATP-EMTP, using a sampling frequency of 100 kHz to capture high-frequency traveling wave components.
 
+\textbf{Simulation model at a glance.} The complete ATP-EMTP model encodes the above system in a single \texttt{.atp} file. The DC overhead line is divided into six 50~km segments, each modelled with the J.~Marti frequency-dependent method (Bergeron solver). Converter stations MMC1 and MMC2 are represented by their equivalent RLC circuits (Section~\ref{subsec:mmc_model}) with 100~mH CLRs at each terminal. Fault switches, embedded at every 50~km segment junction and at the forward/reverse external fault buses, are triggered via TACS logic to cover all 42 test scenarios. Post-processing in Python follows a fixed pipeline: Kellenberger mode decomposition $\rightarrow$ Savitzky-Golay ROCOTW derivation $\rightarrow$ four-algorithm classification (detailed in Section~\ref{subsec:atp_procedure}).
+
 \subsection{MMC Station Equivalent Model}
+\label{subsec:mmc_model}
 
 Each MMC station consists of six converter arms (three phases, upper and lower arms), with each arm containing N series-connected half-bridge submodules. For traveling wave analysis during the initial fault transient (before control system response), the MMC can be represented by an equivalent RLC circuit \cite{reference_paper_frechet, debnath2015, tu2011}.
 
@@ -270,7 +273,7 @@ Zero-mode impedance $Z_{C0}$ & 280.90 $\Omega$ \\
 \end{tabular}
 \end{table}
 
-analysis, which provides clearer fault signatures for all four protection methods.
+The line-mode component, isolated via the Kellenberger transformation, provides clearer fault signatures for all four protection methods by minimising ground-return attenuation.
 
 \subsection{Fault Analysis: Internal Faults}
 
@@ -456,6 +459,7 @@ These fundamental differences enable the four protection algorithms to distingui
 \end{itemize}
 
 \subsection{ATP-EMTP Simulation Procedure}
+\label{subsec:atp_procedure}
 
 All 42 fault scenarios are executed in ATP-EMTP and post-processed in Python. The workflow is structured as follows:
 
@@ -829,14 +833,7 @@ The algorithm processes the normalized ROCOTW signal extracted over the 1.0~ms p
 
 For representative fault cases, the measured ROCOTW curve closely follows the internal reference for internal faults, yielding $F_{int} < F_{ext}$, while for external faults the measured signature aligns with the external reference, resulting in $F_{ext} < F_{int}$.
 
-The comprehensive classification results across all test cases are presented in Fig.~\ref{fig:fin_fout_results}. The bar chart displays $F_{int}$ and $F_{ext}$ values for various internal faults (at different locations) and external faults (with different configurations). Green markers indicate correct classifications where the algorithm successfully identified the fault type based on the minimum Fréchet distance criterion.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.85\columnwidth]{Figure_1.png}
-    \caption{Fréchet distance classification results showing $F_{int}$ and $F_{ext}$ values for internal faults (50--250 km) and external faults. Green triangles indicate correct classification.}
-    \label{fig:fin_fout_results}
-\end{figure}
+The complete $F_{int}$ and $F_{ext}$ scores for all 42 fault scenarios are reported in Table~\ref{tab:all_results} (columns $F_{int}$/$F_{ext}$), where the bold entry in each row is the smaller (winning) distance that determines the INTERNAL or EXTERNAL classification. Correct classifications are those in which the bold distance corresponds to the known ground-truth fault type for that scenario.
 
 \subsubsection{Implementation Parameters}
 
