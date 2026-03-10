@@ -88,19 +88,19 @@ Recent research on HVDC protection can be categorized based on the signal proces
 
 \subsection{Research Gap and Contributions}
 
-Despite the proliferation of HVDC protection algorithms, critical knowledge gaps persist:
+Despite the growing body of literature on advanced TW-based HVDC protection, the following specific gaps remain unresolved:
 
 \begin{enumerate}
-    \item \textbf{Lack of direct comparison:} Published studies typically validate individual methods without comparing against alternatives under identical conditions.
-    
-    \item \textbf{Incomplete performance characterization:} Many papers focus on specific aspects (e.g., fault resistance tolerance) while neglecting others (e.g., computational efficiency).
-    
-    \item \textbf{Limited practical guidance:} Protection engineers lack clear recommendations on which algorithm best suits specific system characteristics or operational requirements.
-    
-    \item \textbf{Insufficient robustness testing:} Many proposed schemes are validated under limited scenarios, with inadequate evaluation of edge cases and challenging conditions.
+    \item \textbf{Absence of controlled comparative benchmarks:} Existing implementations of DTW \cite{dtw1}, Fréchet distance \cite{reference_paper_frechet}, and wavelet-based methods \cite{wavelet1, wavelet2} are each validated on distinct simulation platforms with differing line lengths, CLR ratings, and sampling frequencies, precluding statistically meaningful direct performance comparison under identical test conditions.
+
+    \item \textbf{Narrow fault-resistance and location coverage:} The majority of published evaluations report results for fault resistances up to 200--300~$\Omega$ and for a limited number of fault locations. Performance at high-impedance faults ($R_f > 400$~$\Omega$) and under near-relay zone-boundary conditions (within 100~km of the protection relay) remains inadequately documented.
+
+    \item \textbf{Unresolved zone-boundary discrimination:} Internal faults occurring near the current-limiting reactor generate ROCOTW signatures that closely mimic external fault patterns due to wave reflection dynamics at the CLR boundary. This scenario poses the most stringent discrimination challenge yet is rarely subjected to systematic testing in published studies.
+
+    \item \textbf{Absence of multi-algorithm integration strategies:} While individual pattern-matching algorithms have been independently proposed and validated, no prior work has investigated whether combining complementary methods through a structured ensemble framework can overcome the documented individual weaknesses and improve overall dependability and security.
 \end{enumerate}
 
-This paper addresses these gaps through a comprehensive comparative study of four representative advanced TW protection algorithms. The main contributions are:
+This paper directly addresses these gaps through a comprehensive comparative study of four representative advanced TW protection algorithms implemented and tested under identical conditions. The main contributions are:
 
 \begin{itemize}
     \item \textbf{Systematic comparative framework:} All four algorithms (Wavelet/WL with updated reference curve, DTW, Cross-Correlation, Fréchet Distance) are implemented and tested on an identical ATP-EMTP simulation model, ensuring fair comparison.
@@ -823,27 +823,13 @@ Additionally, a confidence metric is defined based on the discrimination margin:
 
 \subsubsection{Method Execution Flow}
 
-The complete Fréchet distance classification algorithm is summarized in the flowchart presented in Fig.~\ref{fig:flowchart}. The process begins with the extracted ROCOTW signal from the post-fault window, proceeds through normalization and resampling stages, and culminates in the comparative distance computation against both reference templates.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=1\columnwidth]{ATP Output (Wattpad Book Cover).jpg}
-    \caption{Flowchart of the Fréchet distance-based fault classification algorithm.}
-    \label{fig:flowchart}
-\end{figure}
+The algorithm processes the normalized ROCOTW signal extracted over the 1.0~ms post-fault window, applies min-max normalization and resampling to 100 uniform points, and then computes Fréchet distances to both the internal and external reference templates. The same two normalized ROCOTW reference curves shared by Algorithm~2 (Fig.~\ref{fig:reference_curves}) are used here without modification; only the distance metric changes from DTW to discrete Fréchet.
 
 \subsubsection{Classification Results}
 
-Fig.~\ref{fig:curve_comparison} demonstrates the curve matching process for representative internal and external fault cases. In the internal fault case (Fig.~\ref{fig:curve_comparison}a), the measured curve closely follows the internal reference, yielding $F_{int} < F_{ext}$. Conversely, for the external fault case (Fig.~\ref{fig:curve_comparison}b), the measured signature aligns with the external reference, resulting in $F_{ext} < F_{int}$.
+For representative fault cases, the measured ROCOTW curve closely follows the internal reference for internal faults, yielding $F_{int} < F_{ext}$, while for external faults the measured signature aligns with the external reference, resulting in $F_{ext} < F_{int}$.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\columnwidth]{FD.png}
-    \caption{Fréchet distance curve matching: (a) internal fault case showing closer alignment with internal reference, (b) external fault case showing closer alignment with external reference. Shaded regions indicate the area contributing to the minimum Fréchet distance.}
-    \label{fig:curve_comparison}
-\end{figure}
-
-The comprehensive classification results across multiple test cases are presented in Fig.~\ref{fig:fin_fout_results}. The bar chart displays $F_{int}$ and $F_{ext}$ values for various internal faults (at different locations) and external faults (with different configurations). Green markers indicate correct classifications where the algorithm successfully identified the fault type based on the minimum Fréchet distance criterion.
+The comprehensive classification results across all test cases are presented in Fig.~\ref{fig:fin_fout_results}. The bar chart displays $F_{int}$ and $F_{ext}$ values for various internal faults (at different locations) and external faults (with different configurations). Green markers indicate correct classifications where the algorithm successfully identified the fault type based on the minimum Fréchet distance criterion.
 
 \begin{figure}[htbp]
     \centering
