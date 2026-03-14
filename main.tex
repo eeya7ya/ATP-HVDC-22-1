@@ -25,7 +25,7 @@
 \begin{document}
 
 % Paper title - CORRECTED: Improved formatting and naming
-\title{Comparative Study of Pattern Matching Algorithms for Traveling Wave Protection in MMC-HVDC Transmission Systems}
+\title{Comparative Evaluation and Ensemble Integration of Traveling Wave Protection Methods for MMC-HVDC Systems: Wavelet Energy, DTW, Cross-Correlation, and Fr\'{e}chet Distance}
 
 % Author names and affiliations
 \author{Yahya Khaled$^{1}$ and Akram Ibrahim$^{1}$
@@ -34,7 +34,7 @@
 
 % Make the title area
 \maketitle
-
+\markboth{Y. KHALED AND A. IBRAHIM: TRAVELING WAVE PROTECTION FOR MMC-HVDC SYSTEMS}{}
 
 \begin{abstract}
 High Voltage Direct Current (HVDC) transmission systems require rapid
@@ -50,29 +50,30 @@ Time Warping (DTW) distance metric, Cross-Correlation pattern matching,
 and Fr\'{e}chet Distance of Rate of Change of Traveling Waves (ROCOTW).
 Additionally, a novel \emph{accuracy-weighted} voting ensemble approach
 is proposed, in which each method's vote weight is derived directly from
-its empirically measured per-tier classification accuracy, eliminating
-hand-tuned parameters. Through systematic ATP-EMTP simulations of a
+its empirically measured per-tier classification accuracy, minimizing
+reliance on hand-tuned parameters. Through systematic ATP-EMTP simulations of a
 300~km, $\pm$500~kV bipolar HVDC system, each algorithm is evaluated
 across 42 fault scenarios including internal faults at five locations
 (50--250~km) and external faults (forward and reverse) with fault
 resistances from 0~$\Omega$ to 750~$\Omega$. Individual method
 accuracies are: Wavelet (WL) 83.3\%, Cross-Correlation 81.0\%,
-Fr\'{e}chet Distance 81.0\%, and DTW 71.4\%. The proposed
-accuracy-weighted ensemble achieves an overall accuracy of
+Fr\'{e}chet Distance 81.0\%, and DTW 71.4\%. The proposed accuracy-weighted ensemble achieves an overall accuracy of
 \textbf{92.9\%} (39/42 cases), with 100\% accuracy for fault
 resistances of 200--750~$\Omega$, and all three ensemble confidence
 tiers exceeding the 80\% threshold (HIGH: 92.9\%, MEDIUM: 100.0\%,
 LOW: 80.0\%). All methods operate within the critical 2--3~ms decision
-window required for HVDC protection. The study provides practical
-recommendations for algorithm selection based on application
-requirements, with the accuracy-weighted ensemble recommended for
-systems requiring balanced dependability, security, and reliable
+window required for HVDC protection. Ensemble vote weights are derived
+from in-sample per-tier accuracy measurements; validation on an
+independent dataset is recommended before field deployment. The study
+provides practical recommendations for algorithm selection based on
+application requirements, with the accuracy-weighted ensemble recommended
+for systems requiring balanced dependability, security, and reliable
 confidence indication.
 \end{abstract}
 
 % Keywords
 \begin{IEEEkeywords}
-HVDC transmission, fault protection, traveling wave, discrete wavelet transform, dynamic time warping, cross-correlation, Fréchet distance, comparative analysis, pattern matching.
+HVDC transmission, modular multilevel converter, fault protection, traveling wave, discrete wavelet transform, dynamic time warping, cross-correlation, Fr\'{e}chet distance, ensemble voting, weighted voting, comparative analysis.
 \end{IEEEkeywords}
 
 % Introduction
@@ -111,9 +112,24 @@ Recent research on HVDC protection can be categorized based on the signal proces
 
 \textbf{Wavelet-based methods:} Discrete Wavelet Transform (DWT) has been widely applied for transient signal analysis in power systems. The multi-resolution analysis capability of wavelets enables simultaneous time-frequency localization, making it suitable for detecting abrupt changes in traveling waves. Studies have demonstrated that wavelet-based methods can effectively capture fault transient characteristics through energy distribution across decomposition levels \cite{wavelet1, wavelet2}. Energy-based approaches analyze the distribution of signal energy across detail coefficients at different scales, where internal faults exhibit concentrated high-frequency energy (dominant energy in fine-scale details D1-D2) due to sharp wavefronts, while external faults show energy shift toward coarser scales (D3-D4) due to current-limiting reactor filtering effects. Classification is performed by comparing the normalized energy distribution vector of the measured fault signal against reference patterns using Euclidean distance metrics. This energy-based approach offers computational efficiency and robustness to amplitude variations when combined with proper normalization.
 
-\textbf{Pattern matching approaches:} DTW and Fréchet distance have been recently introduced to HVDC protection. DTW calculates the optimal alignment between two temporal sequences, accommodating non-linear time variations and making it robust to wave propagation speed uncertainties \cite{dtw1}. The Fréchet distance method, as proposed in \cite{reference_paper_frechet}, measures the similarity between ROCOTW curves, demonstrating excellent fault resistance tolerance up to 600 $\Omega$. These geometric similarity metrics offer intuitive physical interpretation and inherent normalization properties.
+\textbf{Pattern matching approaches:} DTW and Fréchet distance have been
+recently introduced to HVDC protection. DTW calculates the optimal
+alignment between two temporal sequences, accommodating non-linear time
+variations and making it robust to wave propagation speed uncertainties
+\cite{dtw1}. The Fréchet distance method, as proposed in
+\cite{reference_paper_frechet}, measures the similarity between ROCOTW
+curves, demonstrating excellent fault resistance tolerance up to
+600~$\Omega$. Additional pattern-matching variants based on
+waveform-fitting residuals and Levenberg--Marquardt optimization have
+also been proposed for HVDC grid protection \cite{pattern1, pattern2},
+further demonstrating the versatility of curve-shape analysis for
+fault discrimination.
 
 \textbf{Correlation-based schemes:} Cross-correlation analysis provides a computationally efficient means of pattern matching, with established theoretical foundations in signal processing. Pearson correlation coefficients quantify the linear relationship between measured and reference waveforms, offering simplicity and fast execution. However, sensitivity to amplitude scaling and time-shift variations may limit performance in certain scenarios.
+Recent waveform-fitting approaches have also been proposed, including
+Levenberg--Marquardt curve fitting \cite{pattern1} and waveform-residual
+ratio methods \cite{pattern2}, which further motivate the need for
+systematic comparative evaluation under identical test conditions.
 
 \subsection{Research Gap and Contributions}
 
@@ -138,7 +154,11 @@ This paper directly addresses these gaps through a comprehensive comparative stu
     
     \item \textbf{Extensive test scenarios:} 42 comprehensive fault cases spanning various fault types (pole-to-ground), locations (50--250 km), resistances (0--750~$\Omega$), and system conditions, with detailed performance evaluation for each algorithm including the new WL reference curve.
 
-    \item \textbf{Novel ensemble methodology:} A weighted voting ensemble approach that synergistically combines all four algorithms to achieve superior accuracy and robustness compared to individual methods.
+    \item \textbf{Novel accuracy-weighted ensemble methodology:} An
+ensemble voting approach in which each method's vote weight is derived
+directly from its empirically measured per-tier classification accuracy,
+synergistically combining all four algorithms to achieve superior
+accuracy and robustness without hand-tuned voting constants.
     
     \item \textbf{Practical implementation insights:} Detailed analysis of trade-offs between accuracy, speed, and complexity, with specific recommendations for algorithm selection based on application requirements.
     
@@ -281,7 +301,7 @@ Table \ref{table:line_params} summarizes the transmission line model parameters.
 
 \begin{table}[!t]
 \centering
-\caption{DC Transmission Line Model Parameters}
+\caption{DC Transmission Line Configuration and Simulation Parameters}
 \label{table:line_params}
 \begin{tabular}{|l|c|}
 \hline
@@ -551,8 +571,12 @@ where $w$ is the window length, $p$ is the polynomial order, and $d=1$ indicates
 To eliminate amplitude variations due to fault resistance, the ROCOTW is normalized to the [0, 1] range:
 
 \begin{equation}
-\hat{u}_{b1}[n] = \frac{u_{b1}[n] - \min(u_{b1})}{\max(u_{b1}) - \min(u_{b1})}
+\hat{u}_{b1}[n] = \frac{u_{b1}[n] - \min_n(u_{b1})}{\max_n(u_{b1}) - \min_n(u_{b1})}
 \end{equation}
+where $\hat{u}_{b1}$ denotes the normalized signal used as input to all
+four classification algorithms; $u_{b1}$ is the raw ROCOTW signal,
+and $\min_n(\cdot)$, $\max_n(\cdot)$ denote the sample-wise minimum
+and maximum over the 1.0~ms analysis window.
 
 This normalization ensures that pattern matching focuses on waveform shape rather than magnitude.
 
@@ -696,15 +720,20 @@ These results collectively confirm that the WL method is best suited for dependa
 \subsubsection{Mathematical Foundation}
 
 DTW computes the optimal alignment between two time series by allowing 
-non-linear time-axis warping \cite{sakoe1978, dtw1}. The DTW cost matrix 
-$D(i,j)$ is computed recursively using the \textit{symmetric-2 step pattern}:
-
+non-linear time-axis warping \cite{sakoe1978, dtw1}. The DTW cost matrix $D(i,j)$ is computed recursively using the
+\textit{symmetric-2 step pattern} of Sakoe and Chiba \cite{sakoe1978},
+which assigns unit weight to diagonal (match) steps and double weight
+to horizontal/vertical (insertion/deletion) steps to penalise
+temporal distortion:
 \begin{equation}
-D(i,j) = d(x_i, y_j) + \min\begin{cases}
-D(i-1, j) + d(x_i, y_j) & \text{(vertical)} \\
-D(i, j-1) + d(x_i, y_j) & \text{(horizontal)} \\
-D(i-1, j-1)              & \text{(diagonal)}
-\end{cases}
+D(i,j) = \min
+\left\{
+\begin{array}{ll}
+D(i-1,\,j)   + 2\,d(x_i, y_j) & \quad \text{(vertical step)}   \\[4pt]
+D(i,\,j-1)   + 2\,d(x_i, y_j) & \quad \text{(horizontal step)} \\[4pt]
+D(i-1,\,j-1) + \,d(x_i, y_j)  & \quad \text{(diagonal step)}
+\end{array}
+\right.
 \end{equation}
 
 with boundary conditions $D(0,0) = 0$ and $D(i,0) = D(0,j) = \infty$,
@@ -928,15 +957,12 @@ strong external fault rejection, matching DTW on this metric. Recall
 is 76.7\%, with 7 internal faults misclassified as external---primarily
 at near-relay boundary locations (50~km) under low fault resistances
 where the ROCOTW signatures exhibit reduced correlation contrast between
-the two reference templates. The F1 score of 85.2\% represents the
-precision of 95.8\% and F1 score of 85.2\%, values shared with the
+the two reference templates. The resulting F1 score of 85.2\% is numerically identical to that of
+the Fr\'{e}chet Distance method at the aggregate level, though the two
+methods differ in their confidence-tier reliability profiles.
 Fr\'{e}chet Distance method at the aggregate level. The two methods
 are distinguished not by their overall accuracy but by their
-confidence-tier reliability profiles: Cross-Correlation achieves
-95.0\% at HIGH confidence while Fr\'{e}chet achieves 82.8\%,
-but Cross-Correlation collapses to 50.0\% at LOW confidence
-while Fr\'{e}chet maintains 66.7\%., reflecting the
-favorable precision--recall balance of Cross-Correlation.
+confidence-tier reliability profiles, as discussed below.
 
 \begin{figure}[!t]
     \centering
@@ -1001,19 +1027,15 @@ reference templates for correlation-based discrimination to be effective.
 \end{figure}
 
 These results characterize Cross-Correlation as a \emph{precision-biased}
-method with the precision of 95.8\% and F1 score of 85.2\%, values shared with the
-Fr\'{e}chet Distance method at the aggregate level. The two methods
-are distinguished not by their overall accuracy but by their
-confidence-tier reliability profiles: Cross-Correlation achieves
-95.0\% at HIGH confidence while Fr\'{e}chet achieves 82.8\%,
-but Cross-Correlation collapses to 50.0\% at LOW confidence
-while Fr\'{e}chet maintains 66.7\%.
-Its $O(n)$ computational complexity and straightforward implementation
-make it the most resource-efficient choice, while the confidence tier
-framework reliably identifies the 12 low-margin cases that benefit most
-from ensemble integration. For the 30 HIGH and MEDIUM confidence cases,
-Cross-Correlation achieves 93.3\% accuracy---a performance level
-competitive with more computationally intensive methods.
+method whose reliability is strongly tier-dependent. While its aggregate
+precision (95.8\%) and F1 score (85.2\%) are shared with the
+Fr\'{e}chet Distance method, the two algorithms differ fundamentally
+in confidence-tier behavior: Cross-Correlation achieves 95.0\% at HIGH
+confidence against Fr\'{e}chet's 82.8\%, but collapses to 50.0\% at
+LOW confidence where Fr\'{e}chet maintains 66.7\%. Its $O(n)$
+computational complexity makes it the most resource-efficient choice.
+For the 30 HIGH and MEDIUM confidence cases, Cross-Correlation achieves
+93.3\% accuracy---competitive with more computationally intensive methods.
 
 %============================================================================
 % Algorithm 4 - Fréchet Distance of ROCOTW Curves
@@ -1355,17 +1377,12 @@ achieves 100\% accuracy, a unique characteristic exploited by the
 ensemble.
 
 \item \textbf{Cross-Correlation} achieves 81.0\% overall accuracy with
-precision of 95.8\% and F1 score of 85.2\%, values shared with the
-Fr\'{e}chet Distance method at the aggregate level. The two methods
-are distinguished not by their overall accuracy but by their
-confidence-tier reliability profiles: Cross-Correlation achieves
-95.0\% at HIGH confidence while Fr\'{e}chet achieves 82.8\%,
-but Cross-Correlation collapses to 50.0\% at LOW confidence
-while Fr\'{e}chet maintains 66.7\%.
-HIGH and MEDIUM confidence tiers are reliable (95.0\% and 90.0\%),
-but the LOW tier degrades to 50.0\%, identifying the 50~km boundary
-group as the primary failure mode. It is the fastest method at $O(n)$
-complexity.
+precision of 95.8\% and F1 score of 85.2\%, both shared with the
+Fr\'{e}chet Distance method at the aggregate level. The key
+differentiator is confidence-tier behavior: HIGH and MEDIUM tiers
+achieve 95.0\% and 90.0\% respectively, but the LOW tier degrades to
+50.0\%, identifying the 50~km boundary group as the primary failure
+mode. It is the fastest method at $O(n)$ complexity.
 
 \item \textbf{Fr\'{e}chet Distance (FD)} achieves 81.0\% overall
 accuracy with the most consistent confidence-tier accuracy profile
@@ -1425,16 +1442,11 @@ reveals complementary error patterns across the four methods:
     exceptional LOW-tier accuracy of 100\%.
 
     \item \textbf{Cross-Correlation:} Achieves 81.0\% overall accuracy
-    with precision of 95.8\% and F1 score of 85.2\%, values shared with the
-Fr\'{e}chet Distance method at the aggregate level. The two methods
-are distinguished not by their overall accuracy but by their
-confidence-tier reliability profiles: Cross-Correlation achieves
-95.0\% at HIGH confidence while Fr\'{e}chet achieves 82.8\%,
-but Cross-Correlation collapses to 50.0\% at LOW confidence
-while Fr\'{e}chet maintains 66.7\%.
-    HIGH and MEDIUM confidence tiers are highly reliable (95.0\% and
-    90.0\%), but LOW confidence degrades to 50.0\%, identifying clear
-    boundary-zone failure modes.
+with precision of 95.8\% and F1 score of 85.2\%, both shared with
+the Fr\'{e}chet Distance at the aggregate level. HIGH and MEDIUM
+confidence tiers are highly reliable (95.0\% and 90.0\%), but LOW
+confidence degrades to 50.0\%, identifying clear boundary-zone
+failure modes.
 
     \item \textbf{Fr\'{e}chet Distance (FD):} Achieves 81.0\% overall
     accuracy with balanced precision and consistent confidence-tier
@@ -1523,11 +1535,12 @@ margin $\Delta_m = |s_m^{int} - s_m^{ext}|$ and, for DTW, a
 supplementary relative margin criterion:
 
 \textbf{Distance-based methods (FD, WL):}
+where $\tau_H = 0.05$ and $\tau_L = 0.02$ for both methods:
 \begin{equation}
 c_m = \begin{cases}
-\text{HIGH}   & \text{if } \Delta_m > \tau_H \\
-\text{MEDIUM} & \text{if } \tau_L < \Delta_m \leq \tau_H \\
-\text{LOW}    & \text{if } \Delta_m \leq \tau_L
+\text{HIGH}   & \text{if } \Delta_m > 0.05 \\
+\text{MEDIUM} & \text{if } 0.02 < \Delta_m \leq 0.05 \\
+\text{LOW}    & \text{if } \Delta_m \leq 0.02
 \end{cases}
 \end{equation}
 
@@ -2035,10 +2048,11 @@ characteristics across the 42-case study (fault resistances
     the only method that is unreliable precisely when least certain.
 
     \item \textbf{Cross-Correlation:} Achieved 81.0\% overall accuracy
-    (34/42) with the highest individual precision (95.8\%) and F1
-    score (85.2\%). HIGH and MEDIUM confidence tiers are highly
-    reliable (95.0\% and 90.0\%). The method offers $O(n)$ complexity
-    and 0.3~ms execution, making it the most resource-efficient choice.
+(34/42) with precision of 95.8\% and F1 score of 85.2\%, equal to
+the Fr\'{e}chet Distance at the aggregate level. HIGH and MEDIUM
+confidence tiers are highly reliable (95.0\% and 90.0\%). The method
+offers $O(n)$ complexity and 0.3~ms execution, making it the most
+resource-efficient choice.
 
     \item \textbf{Fr\'{e}chet Distance (FD):} Achieved 81.0\% overall
     accuracy (34/42) with the most stable confidence-tier accuracy
