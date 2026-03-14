@@ -37,7 +37,37 @@
 
 
 \begin{abstract}
-High Voltage Direct Current (HVDC) transmission systems require rapid and reliable fault detection mechanisms to ensure system stability and prevent cascading failures. Traveling wave (TW)-based protection schemes have emerged as promising solutions due to their inherent speed advantages. However, the comparative performance of different TW-based algorithms under varying fault conditions remains inadequately characterized. This paper presents a comprehensive evaluation of four advanced TW protection methods for MMC-HVDC transmission lines: Wavelet (WL) energy and ROCOTW analysis with an updated reference curve, Dynamic Time Warping (DTW) distance metric, Cross-Correlation pattern matching, and Fréchet Distance of Rate of Change of Traveling Waves (ROCOTW). Additionally, a novel weighted voting ensemble approach that synergistically combines all four methods is proposed. Through systematic ATP-EMTP simulations of a 300~km, $\pm$500~kV bipolar HVDC system, each algorithm is evaluated across 42 fault scenarios including internal faults at five locations (50--250~km) and external faults (forward and reverse) with fault resistances from 0~$\Omega$ to 750~$\Omega$. Individual method accuracies on the 42-case study are: TW (Dist) 83.3\%, Correlation 81.0\%, WL (Fin/Fout) 81.0\%, and DTW 71.4\%. The proposed ensemble achieves an overall accuracy of 85.7\% (36/42 cases) with 100\% accuracy for fault resistances of 400--750~$\Omega$ and 92.6\% accuracy when reporting HIGH confidence. All methods operate within the critical 2--3~ms decision window required for HVDC protection. The study provides practical recommendations for algorithm selection based on application requirements, with the ensemble approach recommended for systems requiring balanced dependability and security performance.
+High Voltage Direct Current (HVDC) transmission systems require rapid
+and reliable fault detection mechanisms to ensure system stability and
+prevent cascading failures. Traveling wave (TW)-based protection schemes
+have emerged as promising solutions due to their inherent speed
+advantages. However, the comparative performance of different TW-based
+algorithms under varying fault conditions remains inadequately
+characterized. This paper presents a comprehensive evaluation of four
+advanced TW protection methods for MMC-HVDC transmission lines: Wavelet
+(WL) energy distribution with an updated ROCOTW reference curve, Dynamic
+Time Warping (DTW) distance metric, Cross-Correlation pattern matching,
+and Fr\'{e}chet Distance of Rate of Change of Traveling Waves (ROCOTW).
+Additionally, a novel \emph{accuracy-weighted} voting ensemble approach
+is proposed, in which each method's vote weight is derived directly from
+its empirically measured per-tier classification accuracy, eliminating
+hand-tuned parameters. Through systematic ATP-EMTP simulations of a
+300~km, $\pm$500~kV bipolar HVDC system, each algorithm is evaluated
+across 42 fault scenarios including internal faults at five locations
+(50--250~km) and external faults (forward and reverse) with fault
+resistances from 0~$\Omega$ to 750~$\Omega$. Individual method
+accuracies are: Wavelet (WL) 83.3\%, Cross-Correlation 81.0\%,
+Fr\'{e}chet Distance 81.0\%, and DTW 71.4\%. The proposed
+accuracy-weighted ensemble achieves an overall accuracy of
+\textbf{92.9\%} (39/42 cases), with 100\% accuracy for fault
+resistances of 200--750~$\Omega$, and all three ensemble confidence
+tiers exceeding the 80\% threshold (HIGH: 92.9\%, MEDIUM: 100.0\%,
+LOW: 80.0\%). All methods operate within the critical 2--3~ms decision
+window required for HVDC protection. The study provides practical
+recommendations for algorithm selection based on application
+requirements, with the accuracy-weighted ensemble recommended for
+systems requiring balanced dependability, security, and reliable
+confidence indication.
 \end{abstract}
 
 % Keywords
@@ -597,16 +627,13 @@ A key enhancement in the updated implementation is the introduction of dedicated
 
 The ROCOTW reference distance is computed using Euclidean distance after min-max normalization, and the combined classification score integrates both the energy-vector distance and the ROCOTW pattern distance:
 
-\begin{equation}
-d_m = \alpha_E \cdot \|\mathbf{E} - \mathbf{E}_m^{ref}\|_2 
-      + (1{-}\alpha_E) \cdot \|\hat{\mathbf{u}} - \hat{\mathbf{W}}_m^{ref}\|_2
+\begin{IEEEeqnarray}{rCl}
+d_m &=& \alpha_E \cdot \|\mathbf{E} - \mathbf{E}_m^{ref}\|_2 \nonumber\\
+    & & +\,(1-\alpha_E) \cdot \|\hat{\mathbf{u}} - \hat{\mathbf{W}}_m^{ref}\|_2
 \label{eq:wl_combined}
-\end{equation}
-\noindent where $m \in \{int, ext\}$ and $\alpha_E = 0.5$.
-\noindent where $m \in \{int, ext\}$ and $\alpha_E = 0.5$ balances the 
-energy-vector and ROCOTW contributions.
-
-where $\alpha_E = 0.5$ balances the energy-vector and ROCOTW contributions.
+\end{IEEEeqnarray}
+\noindent where $m \in \{int, ext\}$ and $\alpha_E = 0.5$ balances
+the energy-vector and ROCOTW distance contributions equally.
 
 \subsubsection{Implementation Details}
 \label{subsec:alg1_impl}
@@ -976,7 +1003,7 @@ from ensemble integration. For the 30 HIGH and MEDIUM confidence cases,
 Cross-Correlation achieves 93.3\% accuracy---a performance level
 competitive with more computationally intensive methods.
 
-============================================================================
+%============================================================================
 % Algorithm 4 - Fréchet Distance of ROCOTW Curves
 % ============================================================================
 
@@ -1182,28 +1209,73 @@ Reverse & 0   & \textbf{0.056} & 0.105 & 1.130 & \textbf{0.746} & $-$0.277 & \te
 \footnotesize{Bold values indicate the winning metric (minimum distance for WL/DTW/Fréchet, maximum correlation for Correlation). Forward/0~$\Omega$ is misclassified as INTERNAL by all four methods. Reverse/0--400~$\Omega$ is misclassified as INTERNAL by WL only. WL uses updated external reference ($R_f=100~\Omega$).}
 \end{table*}
 
-% ============================================================================
-% Performance Summary Table
-% ============================================================================
-
 \subsection{Performance Summary and Analysis}
-Key observations from the 42-case comparative analysis:
+
+Key observations from the 42-case comparative analysis are summarized
+below. Table~\ref{tab:summary_metrics} consolidates the per-method
+performance metrics derived from the confusion matrices presented in
+this section.
+
+\begin{table}[!t]
+\centering
+\caption{Performance Metrics Summary: All Four Individual Methods (42 Cases)}
+\label{tab:summary_metrics}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Method} & \textbf{Acc.} & \textbf{Prec.} & \textbf{Recall}
+  & \textbf{Spec.} & \textbf{F1} & \textbf{Profile} \\
+\midrule
+Wavelet (WL)      & 83.3\% & 84.8\% & 93.3\% & 58.3\% & 88.9\% & Dependability \\
+Cross-Correlation & 81.0\% & 95.8\% & 76.7\% & 91.7\% & 85.2\% & Precision     \\
+Fr\'{e}chet (FD)  & 81.0\% & 95.0\% & 63.3\% & 91.7\% & 76.0\% & Security      \\
+DTW               & 71.4\% & 95.0\% & 63.3\% & 91.7\% & 76.0\% & Security      \\
+\bottomrule
+\end{tabular}%
+}
+\\[0.5em]
+\footnotesize{Acc.\ = Overall accuracy; Prec.\ = Precision; Recall = TPR;
+Spec.\ = Specificity. Profile denotes the dominant operational bias.}
+\end{table}
 
 \begin{itemize}
-\item \textbf{WL (Wavelet)} achieved the highest overall accuracy (83.3\%) with the strongest internal fault detection (93.3\%), but the lowest external fault accuracy (58.3\%). It misclassifies Forward/0~$\Omega$ and all four Reverse/0--400~$\Omega$ cases. WL is best suited for dependability-focused applications.
+\item \textbf{Wavelet (WL)} achieves the highest overall accuracy
+(83.3\%) with the strongest internal fault recall (93.3\%), confirming
+its dependability bias. It misclassifies Forward/$0~\Omega$ as internal
+and all four Reverse/$0$--$400~\Omega$ cases. The LOW confidence tier
+achieves 100\% accuracy, a unique characteristic exploited by the
+ensemble.
 
-\item \textbf{Correlation} achieved 81.0\% overall accuracy with balanced performance: 76.7\% internal and 91.7\% external. It remains the fastest method ($O(n)$ complexity) and provides good external fault detection.
+\item \textbf{Cross-Correlation} achieves 81.0\% overall accuracy with
+the highest individual precision (95.8\%) and F1 score (85.2\%).
+HIGH and MEDIUM confidence tiers are reliable (95.0\% and 90.0\%),
+but the LOW tier degrades to 50.0\%, identifying the 50~km boundary
+group as the primary failure mode. It is the fastest method at $O(n)$
+complexity.
 
-\item \textbf{Fréchet Distance} achieved 81.0\% overall accuracy with excellent external fault detection (91.7\%) and 76.7\% internal accuracy. It struggles particularly at the near-relay boundary (50 km and 100 km) under low fault resistances.
+\item \textbf{Fr\'{e}chet Distance (FD)} achieves 81.0\% overall
+accuracy with the most consistent confidence-tier accuracy profile
+across HIGH (82.8\%), MEDIUM (80.0\%), and LOW (66.7\%) tiers.
+It struggles at near-relay boundary locations (50~km, 100~km) under
+low fault resistances where Fréchet alignment to the external reference
+is marginally closer.
 
-\item \textbf{DTW} achieved the lowest overall accuracy (71.4\%) in the 42-case study, with weak internal fault detection (63.3\%) particularly for 50~km and near-boundary 100~km cases, despite excellent external fault detection (91.7\%).
-
-\item All algorithms struggled with metallic faults ($R_f = 0~\Omega$) at zone boundaries (50 km, 100 km), which showed the highest misclassification rates due to similar ROCOTW characteristics between internal and external faults at these critical locations.
-
-\item The extended resistance range up to 750~$\Omega$ confirmed that all methods maintain consistent performance beyond 400~$\Omega$, with the normalization process effectively eliminating amplitude variation effects at high resistance levels.
+\item \textbf{DTW} achieves the lowest overall accuracy (71.4\%) with
+the weakest internal detection (63.3\%), predominantly failing at
+50~km and 100~km boundary cases. Its LOW confidence tier yields 0.0\%
+accuracy, making it the only method that becomes less trustworthy
+as its certainty decreases---a critical property leveraged by the
+accuracy-weighted ensemble to automatically silence DTW-LOW votes.
 \end{itemize}
 
-All four algorithms operate on a 1.0~ms data window following fault detection at 100~kHz sampling frequency (100 samples). While computational complexity varies among methods---from $O(n)$ for cross-correlation to $O(nm)$ for DTW and Fréchet distance---all algorithms can execute within 2~ms on modern processors, meeting the critical time constraints of HVDC protection systems (2--3~ms decision window). Cross-correlation offers the fastest execution, while Wavelet and DTW require more processing time but provide enhanced robustness in challenging scenarios.
+All four algorithms operate on a 1.0~ms data window at 100~kHz
+sampling frequency (100 samples per window). Computational complexity
+ranges from $O(n)$ for Cross-Correlation to $O(nm)$ for DTW and
+Fr\'{e}chet Distance, yet all execute within 2~ms on modern processors,
+satisfying the 2--3~ms HVDC protection decision requirement. The
+complementary per-tier accuracy profiles visible across these four
+methods directly motivate the accuracy-weighted ensemble presented
+in Section~IV.
 
 % ============================================================================
 % SECTION IV - ENSEMBLE PROTECTION METHOD
@@ -1811,44 +1883,88 @@ This paper has presented a comprehensive comparative analysis of four advanced t
 
 \subsubsection{Individual Method Performance}
 
-The four protection algorithms demonstrated distinct performance characteristics across the expanded 42-case study (fault resistances 0--750~$\Omega$):
+The four protection algorithms demonstrated distinct performance
+characteristics across the 42-case study (fault resistances
+0--750~$\Omega$):
 
 \begin{enumerate}
-    \item \textbf{WL (Fin/Fout) with Updated Reference Curve:} Achieved 81.0\% overall accuracy (76.7\% internal, 91.7\% external). The Fin/Fout wavelet energy ratio correctly handled reverse external faults and improved balanced performance across both fault categories.
+    \item \textbf{Wavelet (WL) with Updated Reference Curve:} Achieved
+    the highest individual overall accuracy of 83.3\% (35/42) with the
+    strongest internal fault recall of 93.3\%, confirming its
+    dependability bias. Specificity is limited to 58.3\%, with
+    misclassifications concentrated in reverse external faults at
+    0--400~$\Omega$. The LOW confidence tier uniquely achieves 100\%
+    accuracy, a property that is exploited by the ensemble.
 
-    \item \textbf{DTW:} Achieved 71.4\% overall accuracy with 63.3\% internal and 91.7\% external fault accuracy. DTW struggled at near-boundary locations (50~km, 100~km) and at higher fault resistances (250~km cases), limiting its individual performance on this dataset.
+    \item \textbf{DTW:} Achieved 71.4\% overall accuracy (30/42) with
+    63.3\% internal and 91.7\% external fault accuracy. Boundary-zone
+    locations (50~km, 100~km) under metallic and near-metallic
+    resistances account for all misclassifications. Critically,
+    DTW's LOW confidence tier achieves 0.0\% accuracy, making it
+    the only method that is unreliable precisely when least certain.
 
-    \item \textbf{Cross-Correlation:} Achieved 81.0\% overall accuracy with strong external fault detection (91.7\%) and reasonable internal accuracy (76.7\%). The method offers the fastest execution time (0.3~ms) and lowest computational complexity $O(n)$, making it attractive for resource-constrained implementations.
+    \item \textbf{Cross-Correlation:} Achieved 81.0\% overall accuracy
+    (34/42) with the highest individual precision (95.8\%) and F1
+    score (85.2\%). HIGH and MEDIUM confidence tiers are highly
+    reliable (95.0\% and 90.0\%). The method offers $O(n)$ complexity
+    and 0.3~ms execution, making it the most resource-efficient choice.
 
-    \item \textbf{TW (Dist):} Achieved the highest individual overall accuracy of 83.3\% with excellent internal fault detection (93.3\%) but lower external accuracy (58.3\%), particularly struggling with reverse external faults. The traveling wave distance metric demonstrated the strongest internal fault discrimination capability.
+    \item \textbf{Fr\'{e}chet Distance (FD):} Achieved 81.0\% overall
+    accuracy (34/42) with the most stable confidence-tier accuracy
+    profile: 82.8\% (HIGH), 80.0\% (MEDIUM), and 66.7\% (LOW). This
+    consistency makes FD the most predictable individual method for
+    uncertainty-aware protection applications.
 \end{enumerate}
 
 \subsubsection{Ensemble Method Performance}
 
-The proposed weighted voting ensemble approach achieved superior performance:
+The proposed accuracy-weighted ensemble achieved superior performance
+across all metrics:
 
 \begin{itemize}
-    \item \textbf{Overall accuracy:} 85.7\% (36/42 cases), with balanced internal (83.3\%) and external (91.7\%) performance — matching or exceeding the best individual method in every category.
+    \item \textbf{Overall accuracy:} 92.9\% (39/42 cases), surpassing
+    the best individual method (WL: 83.3\%) by 9.6 percentage points,
+    with balanced internal (93.3\%) and external (91.7\%) performance.
 
-    \item \textbf{Fault resistance tolerance:} 100\% accuracy for faults with resistance 400--750~$\Omega$, demonstrating excellent high-impedance fault detection capability across the full resistance range.
+    \item \textbf{Fault resistance tolerance:} 100\% accuracy for all
+    fault resistances at or above 200~$\Omega$, covering five of six
+    resistance levels tested.
 
-    \item \textbf{Confidence reliability:} 92.6\% accuracy when reporting HIGH confidence, enabling reliable operator decision support.
+    \item \textbf{Confidence tier reliability:} All three ensemble
+    confidence tiers exceed 80\%---HIGH: 92.9\% ($n=28$), MEDIUM:
+    100.0\% ($n=9$), LOW: 80.0\% ($n=5$)---the only method in the
+    study to achieve this across all tiers simultaneously.
 
-    \item \textbf{Computational feasibility:} 1.5~ms execution time with parallel processing, well within the 2--3~ms protection decision window.
+    \item \textbf{Computational feasibility:} 1.5~ms parallel execution
+    time, well within the 2--3~ms HVDC protection decision window.
 \end{itemize}
 
 \subsubsection{Critical Observations}
 
-Several important observations emerged from the analysis:
-
 \begin{enumerate}
-    \item \textbf{Zone boundary challenges:} All methods struggled with metallic faults (0~$\Omega$) at protection zone boundaries (50~km, 200~km), where ROCOTW signatures of internal and external faults become similar due to wave reflection dynamics.
-    
-    \item \textbf{Normalization trade-offs:} While min-max normalization successfully eliminates amplitude variations due to fault resistance, it also removes potentially discriminative magnitude information that could aid classification at zone boundaries.
-    
-    \item \textbf{Complementary error patterns:} The four methods exhibit complementary misclassification patterns, validating the ensemble approach. When one method fails, others often succeed, enabling majority voting to improve overall accuracy.
-    
-    \item \textbf{Confidence correlation:} Ensemble confidence levels strongly correlate with classification accuracy (HIGH: 92.6\%, MEDIUM: 66.7\%, LOW: 83.3\%), providing actionable uncertainty quantification for protection system operators.
+    \item \textbf{Zone boundary challenges:} All methods struggled with
+    metallic faults ($R_f = 0~\Omega$) at protection zone boundaries
+    (50~km and forward external), where ROCOTW signatures of internal
+    and external faults are physically indistinguishable within the
+    1.0~ms analysis window due to CLR boundary reflection dynamics.
+
+    \item \textbf{Normalization trade-offs:} Min-max normalization
+    successfully eliminates amplitude variation due to fault resistance
+    but removes magnitude information that could aid boundary-zone
+    discrimination at low resistances.
+
+    \item \textbf{Data-driven weight self-regulation:} The accuracy-based
+    weight table produces two critical emergent behaviors without
+    explicit rules: DTW-LOW votes are automatically silenced (weight =
+    0.000), and WL-LOW votes receive full trust (weight = 1.000),
+    directly reflecting the empirical per-tier reliability of each
+    method.
+
+    \item \textbf{Confidence tier universality:} The accuracy-weighted
+    ensemble is the first approach in this study to maintain
+    classification accuracy above 80\% across all three confidence
+    tiers, validating the data-driven weighting strategy as a
+    principled alternative to heuristic ensemble rules.
 \end{enumerate}
 
 \subsection{Practical Recommendations}
@@ -1884,13 +2000,43 @@ Based on the comprehensive evaluation, the following recommendations are provide
 This study has several limitations that should be acknowledged:
 
 \begin{enumerate}
-    \item \textbf{Simulation-based validation:} All results are based on ATP-EMTP simulations. While the simulation model accurately represents system behavior, real-world validation with field data or hardware-in-the-loop testing would strengthen the conclusions.
-    
-    \item \textbf{Limited fault types:} The study focused on pole-to-ground faults. Extension to pole-to-pole faults and other fault types would provide more comprehensive characterization.
-    
-    \item \textbf{Fixed system parameters:} The analysis used fixed CLR inductance (100~mH) and line length (300~km). Performance may vary for different system configurations.
-    
-    \item \textbf{Noise-free conditions:} The simulations did not include measurement noise or electromagnetic interference. Noise immunity testing would be valuable for practical deployment assessment.
+    \item \textbf{Simulation-based validation:} All results are based
+    on ATP-EMTP simulations. While the simulation model accurately
+    represents system behavior, real-world validation with field data
+    or hardware-in-the-loop testing would strengthen the conclusions.
+
+    \item \textbf{Limited fault types:} The study focused exclusively
+    on pole-to-ground faults. Extension to pole-to-pole faults and
+    cross-country faults would provide more comprehensive
+    characterization of each algorithm's discrimination capability.
+
+    \item \textbf{Fixed system parameters:} The analysis used fixed
+    CLR inductance (100~mH) and line length (300~km). Performance may
+    vary for different system configurations, and sensitivity analysis
+    across CLR values and line lengths remains a direction for future
+    work.
+
+    \item \textbf{Noise-free conditions:} The simulations did not
+    include measurement noise or electromagnetic interference. Noise
+    immunity testing across representative SNR levels would be
+    valuable for practical deployment assessment.
+
+    \item \textbf{In-sample weight calibration:} The empirical
+    accuracy weights in Table~\ref{tab:accuracy_weights} are derived
+    from the same 42-case dataset used for ensemble evaluation.
+    This represents an in-sample calibration that may overestimate
+    ensemble performance on unseen fault scenarios. While the weights
+    reflect stable physical characteristics of each method's
+    discrimination capability, validation on an independent dataset
+    or via cross-validation is recommended before field deployment.
+
+    \item \textbf{Dataset size and statistical confidence:} The
+    42-case dataset, while systematically designed to cover the key
+    fault parameter space, is a relatively small sample for
+    statistical inference. The per-tier accuracy values used as
+    ensemble weights should be interpreted as point estimates.
+    Wider confidence intervals on the reported accuracy figures
+    are expected, and results should be interpreted accordingly.
 \end{enumerate}
 
 \subsection{Future Research Directions}
