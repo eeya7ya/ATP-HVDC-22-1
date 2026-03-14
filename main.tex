@@ -1102,16 +1102,19 @@ Fig.~\ref{fig:fd_confusion} presents the confusion matrix and
 associated performance metrics. Of 42 cases, FD correctly classifies
 34: 23 true positives (internal faults correctly identified) and
 11 true negatives (external faults correctly identified), yielding
-an overall accuracy of 81.0\%. The method achieves a precision of
-95.8\% and specificity of 91.7\%, confirming strong external fault
-rejection with only 1 false positive across all 12 external cases.
-Recall is 76.7\%, with 7 internal faults misclassified as
-external---concentrated at near-relay boundary locations (50~km and
-100~km) under low fault resistances, where the Fr\'{e}chet alignment
-to the external reference template is marginally closer due to CLR
-boundary reflection dynamics distorting the initial wavefront shape.
-The F1 score of 85.2\% reflects a favorable precision--recall balance,
-matching Cross-Correlation on this metric.
+an overall accuracy of 81.0\%. Precision reaches 95.8\% and
+specificity reaches 91.7\%, with only 1 false positive across all
+12 external cases. Recall is 76.7\%, with 7 internal faults
+misclassified as external---concentrated at near-relay boundary
+locations (50~km and 100~km) under low fault resistances, where
+the Fr\'{e}chet geometric alignment to the external reference
+template is marginally closer due to CLR boundary reflection
+dynamics distorting the initial wavefront morphology. The F1
+score of 85.2\% and the overall confusion matrix are numerically
+identical to those of the Cross-Correlation method, confirming
+that both methods correctly resolve the same 34 of 42 cases at
+the aggregate level. Their fundamental distinction lies in their
+confidence-tier reliability profiles, as discussed below.
 
 \begin{figure}[!t]
     \centering
@@ -1125,17 +1128,16 @@ matching Cross-Correlation on this metric.
     \label{fig:fd_confusion}
 \end{figure}
 
-The discrimination margin $\Delta F = |F_{int} - F_{ext}|$ stratifies
-decisions into three confidence tiers using the thresholds in
-Table~\ref{tab:fd_parameters}. Fig.~\ref{fig:fd_confidence_tier}
-shows the case distribution. The HIGH confidence tier contains
-29 cases (15 INTERNAL, 14 EXTERNAL), covering 69\% of all decisions
-and reflecting the generally strong geometric discrimination that the
-Fr\'{e}chet distance achieves between internal and external ROCOTW
-curve morphologies. The MEDIUM tier contains 10 cases (8 INTERNAL,
-2 EXTERNAL), while the LOW tier contains only 3 cases (1 INTERNAL,
-2 EXTERNAL), the smallest LOW-tier population among all four
-individual methods.
+The discrimination margin $\Delta F = |F_{int} - F_{ext}|$
+stratifies decisions into three confidence tiers using the
+thresholds in Table~\ref{tab:fd_parameters}.
+Fig.~\ref{fig:fd_confidence_tier} shows the case distribution.
+The HIGH confidence tier contains 29 cases (15 INTERNAL,
+14 EXTERNAL), covering 69\% of all decisions. The MEDIUM tier
+contains 10 cases (8 INTERNAL, 2 EXTERNAL), while the LOW tier
+contains only 3 cases (1 INTERNAL, 2 EXTERNAL)---the smallest
+LOW-tier population among all four individual methods, compared
+to 12 LOW-tier cases for Cross-Correlation.
 
 \begin{figure}[!t]
     \centering
@@ -1148,22 +1150,23 @@ individual methods.
     \label{fig:fd_confidence_tier}
 \end{figure}
 
-Fig.~\ref{fig:fd_accuracy_tier} presents the classification accuracy
-within each confidence tier. The Fr\'{e}chet Distance method exhibits
-the most consistent tier-accuracy profile of all four individual
-methods: the HIGH tier achieves 82.8\% accuracy across 29 cases,
-the MEDIUM tier achieves 80.0\% accuracy across 10 cases, and the
-LOW tier achieves 66.7\% accuracy across 3 cases. Critically, both
-the HIGH and MEDIUM tiers exceed the 80\% reference threshold,
-and all three tiers remain within a 16-percentage-point range
-(66.7\%--82.8\%)---a spread significantly narrower than any other
-individual method. This stability arises from the Fr\'{e}chet
-distance's sensitivity to overall curve morphology rather than
-point-wise correspondence, which produces more gradual confidence
-degradation as fault signatures become ambiguous near zone
-boundaries. The small LOW-tier sample ($n = 3$) limits statistical
-conclusions for that tier, but the 66.7\% accuracy is consistent
-with the method's general boundary-zone limitations.
+Fig.~\ref{fig:fd_accuracy_tier} presents the classification
+accuracy within each confidence tier. Despite sharing an identical
+overall confusion matrix with Cross-Correlation, the Fr\'{e}chet
+Distance exhibits a strikingly different confidence-tier profile.
+The HIGH tier achieves 82.8\% accuracy across 29 cases and the
+MEDIUM tier achieves 80.0\% accuracy across 10 cases---both
+meeting the 80\% reference threshold, but both lower than
+Cross-Correlation's corresponding HIGH (95.0\%) and MEDIUM
+(90.0\%) tier accuracies. The LOW tier achieves 66.7\% accuracy
+across only 3 cases, significantly better than Cross-Correlation's
+LOW tier (50.0\% across 12 cases). Most importantly, all three
+Fr\'{e}chet tiers remain within a 16-percentage-point range
+(66.7\%--82.8\%)---the narrowest spread of any individual method
+in this study---confirming that the Fr\'{e}chet distance degrades
+gracefully and predictably as fault signatures approach the
+zone-boundary ambiguity region, rather than collapsing abruptly
+as Cross-Correlation does at LOW confidence.
 
 \begin{figure}[!t]
     \centering
@@ -1171,22 +1174,20 @@ with the method's general boundary-zone limitations.
     \caption{Classification accuracy per confidence tier for the
     Fr\'{e}chet Distance method. The 80\% reference line is shown
     as a dashed guide. HIGH: 82.8\% ($n = 29$); MEDIUM: 80.0\%
-    ($n = 10$); LOW: 66.7\% ($n = 3$). The HIGH and MEDIUM tiers
-    both meet or exceed 80\%, and all three tiers fall within a
-    16-percentage-point range---the most uniform confidence-accuracy
+    ($n = 10$); LOW: 66.7\% ($n = 3$). All three tiers fall within
+    a 16-percentage-point range, the most uniform confidence-accuracy
     profile among all four individual methods.}
     \label{fig:fd_accuracy_tier}
 \end{figure}
 
-These results characterize Fr\'{e}chet Distance as a
-\emph{security-biased} method with the most uniform confidence
-reliability. Its consistent tier-accuracy profile---HIGH: 82.8\%,
-MEDIUM: 80.0\%, LOW: 66.7\%---directly informs the ensemble weight
-table (Table~\ref{tab:accuracy_weights}), where FD carries the second
-most stable weight column across tiers (range: 0.161), confirming
-that the Fr\'{e}chet distance's geometric discrimination capability
-degrades predictably and proportionally as fault signatures approach
-the zone-boundary ambiguity region.
+These results characterize Fr\'{e}chet Distance as a method with
+the most uniform confidence reliability among individual algorithms.
+While it shares the same aggregate accuracy (81.0\%) and confusion
+matrix with Cross-Correlation, its confidence-tier stability
+(HIGH: 0.828, MEDIUM: 0.800, LOW: 0.667 in
+Table~\ref{tab:accuracy_weights}) makes it the most predictable
+contributor to the ensemble across all confidence levels, with no
+tier producing unreliable votes.
 
 \subsubsection{Classification Results}
 
