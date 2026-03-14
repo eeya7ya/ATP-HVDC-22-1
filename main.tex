@@ -1094,6 +1094,100 @@ Additionally, a confidence metric is defined based on the discrimination margin:
 
 The algorithm processes the normalized ROCOTW signal extracted over the 1.0~ms post-fault window, applies min-max normalization and resampling to 100 uniform points, and then computes Fréchet distances to both the internal and external reference templates. The same two normalized ROCOTW reference curves shared by Algorithm~2 (Fig.~\ref{fig:reference_curves}) are used here without modification; only the distance metric changes from DTW to discrete Fréchet.
 
+\subsubsection{Classification Performance}
+
+The Fr\'{e}chet Distance method is evaluated across all 42 fault
+scenarios using the normalized ROCOTW pipeline described above.
+Fig.~\ref{fig:fd_confusion} presents the confusion matrix and
+associated performance metrics. Of 42 cases, FD correctly classifies
+34: 23 true positives (internal faults correctly identified) and
+11 true negatives (external faults correctly identified), yielding
+an overall accuracy of 81.0\%. The method achieves a precision of
+95.8\% and specificity of 91.7\%, confirming strong external fault
+rejection with only 1 false positive across all 12 external cases.
+Recall is 76.7\%, with 7 internal faults misclassified as
+external---concentrated at near-relay boundary locations (50~km and
+100~km) under low fault resistances, where the Fr\'{e}chet alignment
+to the external reference template is marginally closer due to CLR
+boundary reflection dynamics distorting the initial wavefront shape.
+The F1 score of 85.2\% reflects a favorable precision--recall balance,
+matching Cross-Correlation on this metric.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\columnwidth]{Confusion_Metrix.png}
+    \caption{Confusion matrix and performance metrics for the
+    Fr\'{e}chet Distance method across 42 ATP-EMTP fault scenarios.
+    TP: true positives (internal correctly classified); TN: true
+    negatives (external correctly classified); FP: false positives
+    (external misclassified as internal); FN: false negatives
+    (internal misclassified as external).}
+    \label{fig:fd_confusion}
+\end{figure}
+
+The discrimination margin $\Delta F = |F_{int} - F_{ext}|$ stratifies
+decisions into three confidence tiers using the thresholds in
+Table~\ref{tab:fd_parameters}. Fig.~\ref{fig:fd_confidence_tier}
+shows the case distribution. The HIGH confidence tier contains
+29 cases (15 INTERNAL, 14 EXTERNAL), covering 69\% of all decisions
+and reflecting the generally strong geometric discrimination that the
+Fr\'{e}chet distance achieves between internal and external ROCOTW
+curve morphologies. The MEDIUM tier contains 10 cases (8 INTERNAL,
+2 EXTERNAL), while the LOW tier contains only 3 cases (1 INTERNAL,
+2 EXTERNAL), the smallest LOW-tier population among all four
+individual methods.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\columnwidth]{Confidence_Tier.png}
+    \caption{Detection count by confidence tier for the Fr\'{e}chet
+    Distance method. HIGH confidence: $\Delta F > 0.05$; MEDIUM
+    confidence: $0.02 < \Delta F \leq 0.05$; LOW confidence:
+    $\Delta F \leq 0.02$. Green bars denote INTERNAL classifications;
+    red bars denote EXTERNAL classifications.}
+    \label{fig:fd_confidence_tier}
+\end{figure}
+
+Fig.~\ref{fig:fd_accuracy_tier} presents the classification accuracy
+within each confidence tier. The Fr\'{e}chet Distance method exhibits
+the most consistent tier-accuracy profile of all four individual
+methods: the HIGH tier achieves 82.8\% accuracy across 29 cases,
+the MEDIUM tier achieves 80.0\% accuracy across 10 cases, and the
+LOW tier achieves 66.7\% accuracy across 3 cases. Critically, both
+the HIGH and MEDIUM tiers exceed the 80\% reference threshold,
+and all three tiers remain within a 16-percentage-point range
+(66.7\%--82.8\%)---a spread significantly narrower than any other
+individual method. This stability arises from the Fr\'{e}chet
+distance's sensitivity to overall curve morphology rather than
+point-wise correspondence, which produces more gradual confidence
+degradation as fault signatures become ambiguous near zone
+boundaries. The small LOW-tier sample ($n = 3$) limits statistical
+conclusions for that tier, but the 66.7\% accuracy is consistent
+with the method's general boundary-zone limitations.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\columnwidth]{Accurecy_Per_Confidance_Tier.png}
+    \caption{Classification accuracy per confidence tier for the
+    Fr\'{e}chet Distance method. The 80\% reference line is shown
+    as a dashed guide. HIGH: 82.8\% ($n = 29$); MEDIUM: 80.0\%
+    ($n = 10$); LOW: 66.7\% ($n = 3$). The HIGH and MEDIUM tiers
+    both meet or exceed 80\%, and all three tiers fall within a
+    16-percentage-point range---the most uniform confidence-accuracy
+    profile among all four individual methods.}
+    \label{fig:fd_accuracy_tier}
+\end{figure}
+
+These results characterize Fr\'{e}chet Distance as a
+\emph{security-biased} method with the most uniform confidence
+reliability. Its consistent tier-accuracy profile---HIGH: 82.8\%,
+MEDIUM: 80.0\%, LOW: 66.7\%---directly informs the ensemble weight
+table (Table~\ref{tab:accuracy_weights}), where FD carries the second
+most stable weight column across tiers (range: 0.161), confirming
+that the Fr\'{e}chet distance's geometric discrimination capability
+degrades predictably and proportionally as fault signatures approach
+the zone-boundary ambiguity region.
+
 \subsubsection{Classification Results}
 
 For representative fault cases, the measured ROCOTW curve closely follows the internal reference for internal faults, yielding $F_{int} < F_{ext}$, while for external faults the measured signature aligns with the external reference, resulting in $F_{ext} < F_{int}$.
@@ -1104,23 +1198,24 @@ The complete $F_{int}$ and $F_{ext}$ scores for all 42 fault scenarios are repor
 
 Table~\ref{tab:fd_parameters} summarizes the key parameters used in the Fréchet distance classification algorithm.
 
-\begin{table}[htbp]
+\begin{table}[!t]
     \centering
-    \caption{Fréchet Distance Algorithm Parameters}
+    \caption{Fr\'{e}chet Distance Algorithm Parameters}
     \label{tab:fd_parameters}
-    \begin{tabular}{ll}
-        \hline
+    \begin{tabular}{@{}ll@{}}
+        \toprule
         \textbf{Parameter} & \textbf{Value} \\
-        \hline
-        Analysis window duration & 1.0 ms \\
-        Resampling points & 100 \\
-        Interpolation method & Linear \\
-        Normalization & Min-max $[0, 1]$ \\
-        Internal reference location & 150 km (metallic PGF) \\
-        External reference & Forward fault, $R_f = 0~\Omega$ \\
-        High confidence threshold & $\Delta F > 0.15$ \\
-        Medium confidence threshold & $0.05 < \Delta F \leq 0.15$ \\
-        \hline
+        \midrule
+        Analysis window duration     & 1.0 ms \\
+        Resampling points            & 100 \\
+        Interpolation method         & Linear \\
+        Normalization                & Min-max $[0, 1]$ \\
+        Internal reference location  & 150 km (metallic PGF) \\
+        External reference           & Forward fault, $R_f = 0~\Omega$ \\
+        HIGH confidence threshold    & $\Delta F > 0.05$ \\
+        MEDIUM confidence threshold  & $0.02 < \Delta F \leq 0.05$ \\
+        LOW confidence threshold     & $\Delta F \leq 0.02$ \\
+        \bottomrule
     \end{tabular}
 \end{table}
 
@@ -1228,7 +1323,7 @@ this section.
 \midrule
 Wavelet (WL)      & 83.3\% & 84.8\% & 93.3\% & 58.3\% & 88.9\% & Dependability \\
 Cross-Correlation & 81.0\% & 95.8\% & 76.7\% & 91.7\% & 85.2\% & Precision     \\
-Fr\'{e}chet (FD)  & 81.0\% & 95.0\% & 63.3\% & 91.7\% & 76.0\% & Security      \\
+Fr\'{e}chet (FD)  & 81.0\% & 95.8\% & 76.7\% & 91.7\% & 85.2\% & Security      \\
 DTW               & 71.4\% & 95.0\% & 63.3\% & 91.7\% & 76.0\% & Security      \\
 \bottomrule
 \end{tabular}%
@@ -1476,19 +1571,30 @@ applied before vote aggregation:
 
 \begin{equation}
 W_m' = \begin{cases}
-0            & m = \text{CORR} \\
-0.3 \cdot W_m & m \in \{\text{FD},\,\text{DTW}\} \\
-W_m          & m = \text{WL}
+0              & m = \text{CORR} \\
+0.3 \cdot W_m  & m \in \{\text{FD},\,\text{DTW}\} \\
+W_m            & m = \text{WL}
 \end{cases}
+\label{eq:boundary_rule}
 \end{equation}
 
-This rule fires only in the MEDIUM-confidence regime where the ROCOTW
-signal family (FD, Correlation, DTW) collectively shows insufficient
-discrimination, while the Wavelet method---operating on the energy
-distribution domain rather than the ROCOTW waveform directly---provides
-an independent signal. The rule does not activate when
-Cross-Correlation reports HIGH or MEDIUM confidence, nor when
-Cross-Correlation and Wavelet agree.
+This rule fires only when the ROCOTW signal family (FD, Correlation,
+DTW) collectively shows insufficient discrimination, while the Wavelet
+method---operating on the energy distribution domain rather than the
+ROCOTW waveform directly---provides an independent signal. The rule
+does not activate when Cross-Correlation reports HIGH or MEDIUM
+confidence, nor when Cross-Correlation and Wavelet agree.
+
+It should be noted that the scaling factors in~\eqref{eq:boundary_rule}
+(0.3 for FD and DTW; zero for CORR) are the only hand-specified
+constants in the ensemble framework. They were selected to reflect the
+physical reasoning that when the entire ROCOTW signal family is
+uncertain, their collective vote weight should be substantially reduced
+rather than eliminated, while the energy-domain Wavelet vote remains
+unmodified. All other ensemble weights are derived exclusively from the
+empirical accuracy table (Table~\ref{tab:accuracy_weights}). Validation
+of these scaling factors on an independent dataset is identified as a
+direction for future work.
 
 \subsubsection{Ensemble Confidence Assessment}
 
