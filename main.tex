@@ -929,7 +929,13 @@ is 76.7\%, with 7 internal faults misclassified as external---primarily
 at near-relay boundary locations (50~km) under low fault resistances
 where the ROCOTW signatures exhibit reduced correlation contrast between
 the two reference templates. The F1 score of 85.2\% represents the
-best individual F1 performance across all four methods, reflecting the
+precision of 95.8\% and F1 score of 85.2\%, values shared with the
+Fr\'{e}chet Distance method at the aggregate level. The two methods
+are distinguished not by their overall accuracy but by their
+confidence-tier reliability profiles: Cross-Correlation achieves
+95.0\% at HIGH confidence while Fr\'{e}chet achieves 82.8\%,
+but Cross-Correlation collapses to 50.0\% at LOW confidence
+while Fr\'{e}chet maintains 66.7\%., reflecting the
 favorable precision--recall balance of Cross-Correlation.
 
 \begin{figure}[!t]
@@ -995,7 +1001,13 @@ reference templates for correlation-based discrimination to be effective.
 \end{figure}
 
 These results characterize Cross-Correlation as a \emph{precision-biased}
-method with the best F1 score (85.2\%) among individual algorithms.
+method with the precision of 95.8\% and F1 score of 85.2\%, values shared with the
+Fr\'{e}chet Distance method at the aggregate level. The two methods
+are distinguished not by their overall accuracy but by their
+confidence-tier reliability profiles: Cross-Correlation achieves
+95.0\% at HIGH confidence while Fr\'{e}chet achieves 82.8\%,
+but Cross-Correlation collapses to 50.0\% at LOW confidence
+while Fr\'{e}chet maintains 66.7\%.
 Its $O(n)$ computational complexity and straightforward implementation
 make it the most resource-efficient choice, while the confidence tier
 framework reliably identifies the 12 low-margin cases that benefit most
@@ -1343,7 +1355,13 @@ achieves 100\% accuracy, a unique characteristic exploited by the
 ensemble.
 
 \item \textbf{Cross-Correlation} achieves 81.0\% overall accuracy with
-the highest individual precision (95.8\%) and F1 score (85.2\%).
+precision of 95.8\% and F1 score of 85.2\%, values shared with the
+Fr\'{e}chet Distance method at the aggregate level. The two methods
+are distinguished not by their overall accuracy but by their
+confidence-tier reliability profiles: Cross-Correlation achieves
+95.0\% at HIGH confidence while Fr\'{e}chet achieves 82.8\%,
+but Cross-Correlation collapses to 50.0\% at LOW confidence
+while Fr\'{e}chet maintains 66.7\%.
 HIGH and MEDIUM confidence tiers are reliable (95.0\% and 90.0\%),
 but the LOW tier degrades to 50.0\%, identifying the 50~km boundary
 group as the primary failure mode. It is the fastest method at $O(n)$
@@ -1407,7 +1425,13 @@ reveals complementary error patterns across the four methods:
     exceptional LOW-tier accuracy of 100\%.
 
     \item \textbf{Cross-Correlation:} Achieves 81.0\% overall accuracy
-    with the highest individual precision (95.8\%) and F1 score (85.2\%).
+    with precision of 95.8\% and F1 score of 85.2\%, values shared with the
+Fr\'{e}chet Distance method at the aggregate level. The two methods
+are distinguished not by their overall accuracy but by their
+confidence-tier reliability profiles: Cross-Correlation achieves
+95.0\% at HIGH confidence while Fr\'{e}chet achieves 82.8\%,
+but Cross-Correlation collapses to 50.0\% at LOW confidence
+while Fr\'{e}chet maintains 66.7\%.
     HIGH and MEDIUM confidence tiers are highly reliable (95.0\% and
     90.0\%), but LOW confidence degrades to 50.0\%, identifying clear
     boundary-zone failure modes.
