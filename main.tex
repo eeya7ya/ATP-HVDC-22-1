@@ -427,7 +427,7 @@ U'_{f1}(s) = -\frac{Z_{C1}}{Z_{C1} + sL_{dc}} U_{f1}(s)
 After applying the Bergeron model and inverse Laplace transform, the backward traveling wave at M becomes:
 
 \begin{equation}
-U_{b1}(t) = K \cdot \left[A + B \cdot e^{-\alpha t} - C \cdot e^{-\beta t + \gamma}\right]
+U_{b1}(t) = K \cdot \left[A + B \cdot e^{-\lambda_d t} - C \cdot e^{-\beta t + \gamma}\right]
 \label{eq:external_fault_voltage}
 \end{equation}
 
@@ -437,9 +437,9 @@ K &= \frac{\sqrt{2}U_N(k_1l - 1)Z_{C1}Z^P_1}{Z^P_1 + Z^P_0 + 2R_f} \\
 A &= \frac{1}{Z_{C1}} \\
 B &= \frac{\tau_1 l}{L_{dc} - Z_{C1}\tau_1 l} \\
 C &= \frac{L_{dc}}{Z_{C1}(L_{dc} - Z_{C1}\tau_1 l)} \\
-\alpha &= \frac{1}{\tau_1 l + \frac{1}{v_1\tau_1}} \\
-\beta &= \frac{Z_{C1}}{L_{dc}} \\
-\gamma &= \frac{Z_{C1}l}{v_1L_{dc}}
+\lambda_d &= \frac{1}{\tau_1 l + \frac{1}{v_1\tau_1}} \\
+\beta     &= \frac{Z_{C1}}{L_{dc}} \\
+\gamma    &= \frac{Z_{C1}l}{v_1L_{dc}}
 \end{align}
 
 \textbf{Key characteristic:} For external faults, the backward traveling wave voltage exhibits a \textbf{slow, gradual decline} due to CLR filtering. The rate of change shows a \textbf{moderate initial peak with slow decay}, distinctly different from internal faults.
@@ -959,10 +959,9 @@ at near-relay boundary locations (50~km) under low fault resistances
 where the ROCOTW signatures exhibit reduced correlation contrast between
 the two reference templates. The resulting F1 score of 85.2\% is numerically identical to that of
 the Fr\'{e}chet Distance method at the aggregate level, though the two
-methods differ in their confidence-tier reliability profiles.
-Fr\'{e}chet Distance method at the aggregate level. The two methods
-are distinguished not by their overall accuracy but by their
-confidence-tier reliability profiles, as discussed below.
+methods differ in their confidence-tier reliability profiles,
+as discussed in Section~\ref{sec:fd} and summarised in
+Table~\ref{tab:summary_metrics}.
 
 \begin{figure}[!t]
     \centering
@@ -1721,40 +1720,40 @@ for All 42 Cases (\TT\ = Correct, \FF\ = Incorrect)}
  5 & Forward $600\,\Omega$   & EXT & \TT & \TT & \TT & \TT & \TT \\
  6 & Forward $750\,\Omega$   & EXT & \TT & \TT & \TT & \TT & \TT \\
 \midrule
- 7 & Int.\ 100\,km $0\,\Omega$   & INT & \FF & \FF & \FF & \TT & \TT \\
- 8 & Int.\ 100\,km $100\,\Omega$ & INT & \FF & \TT & \FF & \TT & \FF \\
- 9 & Int.\ 100\,km $200\,\Omega$ & INT & \FF & \TT & \FF & \TT & \TT \\
-10 & Int.\ 100\,km $400\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-11 & Int.\ 100\,km $600\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-12 & Int.\ 100\,km $750\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+ 7 & Int.\ 50\,km $0\,\Omega$    & INT & \FF & \FF & \FF & \FF & \FF \\
+ 8 & Int.\ 50\,km $100\,\Omega$  & INT & \FF & \FF & \FF & \TT & \TT \\
+ 9 & Int.\ 50\,km $200\,\Omega$  & INT & \FF & \FF & \FF & \TT & \TT \\
+10 & Int.\ 50\,km $400\,\Omega$  & INT & \TT & \FF & \FF & \TT & \TT \\
+11 & Int.\ 50\,km $600\,\Omega$  & INT & \TT & \FF & \FF & \TT & \TT \\
+12 & Int.\ 50\,km $750\,\Omega$  & INT & \TT & \FF & \FF & \TT & \TT \\
 \midrule
-13 & Int.\ 150\,km $0\,\Omega$   & INT & \TT & \TT & \TT & \TT & \TT \\
-14 & Int.\ 150\,km $100\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-15 & Int.\ 150\,km $200\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-16 & Int.\ 150\,km $400\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-17 & Int.\ 150\,km $600\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-18 & Int.\ 150\,km $750\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+13 & Int.\ 100\,km $0\,\Omega$   & INT & \FF & \FF & \FF & \TT & \TT \\
+14 & Int.\ 100\,km $100\,\Omega$ & INT & \FF & \TT & \FF & \TT & \FF \\
+15 & Int.\ 100\,km $200\,\Omega$ & INT & \FF & \TT & \FF & \TT & \TT \\
+16 & Int.\ 100\,km $400\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+17 & Int.\ 100\,km $600\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+18 & Int.\ 100\,km $750\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-19 & Int.\ 200\,km $0\,\Omega$   & INT & \FF & \TT & \TT & \FF & \TT \\
-20 & Int.\ 200\,km $100\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-21 & Int.\ 200\,km $200\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-22 & Int.\ 200\,km $400\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-23 & Int.\ 200\,km $600\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-24 & Int.\ 200\,km $750\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+19 & Int.\ 150\,km $0\,\Omega$   & INT & \TT & \TT & \TT & \TT & \TT \\
+20 & Int.\ 150\,km $100\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+21 & Int.\ 150\,km $200\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+22 & Int.\ 150\,km $400\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+23 & Int.\ 150\,km $600\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+24 & Int.\ 150\,km $750\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-25 & Int.\ 250\,km $0\,\Omega$   & INT & \TT & \TT & \TT & \TT & \TT \\
-26 & Int.\ 250\,km $100\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-27 & Int.\ 250\,km $200\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-28 & Int.\ 250\,km $400\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
-29 & Int.\ 250\,km $600\,\Omega$ & INT & \TT & \TT & \FF & \TT & \TT \\
-30 & Int.\ 250\,km $750\,\Omega$ & INT & \TT & \TT & \FF & \TT & \TT \\
+25 & Int.\ 200\,km $0\,\Omega$   & INT & \FF & \TT & \TT & \FF & \TT \\
+26 & Int.\ 200\,km $100\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+27 & Int.\ 200\,km $200\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+28 & Int.\ 200\,km $400\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+29 & Int.\ 200\,km $600\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+30 & Int.\ 200\,km $750\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
 \midrule
-31 & Int.\ 50\,km $0\,\Omega$    & INT & \FF & \FF & \FF & \FF & \FF \\
-32 & Int.\ 50\,km $100\,\Omega$  & INT & \FF & \FF & \FF & \TT & \TT \\
-33 & Int.\ 50\,km $200\,\Omega$  & INT & \FF & \FF & \FF & \TT & \TT \\
-34 & Int.\ 50\,km $400\,\Omega$  & INT & \TT & \FF & \FF & \TT & \TT \\
-35 & Int.\ 50\,km $600\,\Omega$  & INT & \TT & \FF & \FF & \TT & \TT \\
-36 & Int.\ 50\,km $750\,\Omega$  & INT & \TT & \FF & \FF & \TT & \TT \\
+31 & Int.\ 250\,km $0\,\Omega$   & INT & \TT & \TT & \TT & \TT & \TT \\
+32 & Int.\ 250\,km $100\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+33 & Int.\ 250\,km $200\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+34 & Int.\ 250\,km $400\,\Omega$ & INT & \TT & \TT & \TT & \TT & \TT \\
+35 & Int.\ 250\,km $600\,\Omega$ & INT & \TT & \TT & \FF & \TT & \TT \\
+36 & Int.\ 250\,km $750\,\Omega$ & INT & \TT & \TT & \FF & \TT & \TT \\
 \midrule
 37 & Reverse $0\,\Omega$    & EXT & \TT & \TT & \TT & \FF & \TT \\
 38 & Reverse $100\,\Omega$  & EXT & \TT & \TT & \TT & \FF & \TT \\
@@ -1933,11 +1932,13 @@ Three cases are misclassified by the accuracy-weighted ensemble:
 
     \item \textbf{Internal 100~km, $100~\Omega$:} The Wavelet method
     votes INTERNAL with LOW confidence (weight = 1.000) while the
-    remaining three methods vote EXTERNAL. Despite WL's full LOW-tier
-    trust, the combined weight of FD, CORR, and DTW---which receive
-    reduced weights from the boundary-zone rule---narrows the voting
-    margin but still tips to EXTERNAL, resulting in a 2-2 effective
-    tie resolved as EXTERNAL.
+    remaining three methods vote EXTERNAL. The boundary-zone rule
+    reduces FD and DTW weights to $0.3 \times W_m$ and silences CORR
+    entirely ($W_{\text{CORR}} = 0$). Despite WL's full LOW-tier
+    trust, the reduced but non-zero weights of FD and DTW produce
+    $V_{\text{ext}} > V_{\text{int}}$, yielding $S < 0$ and an
+    EXTERNAL decision. The margin is narrow but strictly negative,
+    so the UNCERTAIN branch is not triggered.
 \end{enumerate}
 
 \subsection{Computational Considerations}
@@ -2009,11 +2010,6 @@ window. Addressing this residual challenge requires either a wider
 analysis window---risking inclusion of reflected waves---or integration
 of fault-location estimation to provide location-aware reference
 selection.
-
-% ============================================================================
-% REVISED ABSTRACT
-% ============================================================================
-% Replace the existing abstract with this version:
 
 % ============================================================================
 % SECTION V - CONCLUSION
