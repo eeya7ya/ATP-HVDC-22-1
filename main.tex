@@ -79,9 +79,9 @@ HVDC transmission, modular multilevel converter, fault protection, traveling wav
 % Introduction
 \section{Introduction}
 
-\IEEEPARstart{F}{lexible} HVDC transmission technology based on Modular Multilevel Converters (MMC) has become increasingly critical for modern power systems, enabling efficient long-distance bulk power transmission, integration of renewable energy, and interconnection of asynchronous networks \cite{reference_paper_frechet, debnath2015, perez2015}. The advantages of MMC-HVDC systems include bidirectional power flow capability, low harmonic distortion, black-start capability, and the absence of commutation failure issues characteristic of conventional line-commutated converter (LCC) HVDC systems. However, these advantages come with significant protection challenges.
+\IEEEPARstart{F}{lexible} HVDC transmission technology based on Modular Multilevel Converters (MMC) has become increasingly critical for modern power systems, enabling efficient long-distance bulk power transmission, integration of renewable energy, and interconnection of asynchronous networks \cite{reference_paper_frechet, debnath2015, perez2015, flourentzou2009, vanhertem2016}. The advantages of MMC-HVDC systems include bidirectional power flow capability, low harmonic distortion, black-start capability, and the absence of commutation failure issues characteristic of conventional line-commutated converter (LCC) HVDC systems. However, these advantages come with significant protection challenges.
 
-Unlike traditional AC systems or conventional thyristor-based LCC HVDC systems, MMC-HVDC grids exhibit unique fault characteristics that complicate protection design. When a DC fault occurs, the small damping and low impedance of DC networks result in extremely rapid fault current rise rates (typically $di/dt > 10$ kA/ms), with peak currents reaching several tens of kiloamperes within milliseconds. The submodule capacitors in MMC stations rapidly discharge into the fault location, contributing to the fault current even after converter blocking. These characteristics demand ultra-fast fault detection and isolation mechanisms, typically requiring operation within 2-3 ms to prevent equipment damage and maintain system stability \cite{reference1, reference2, sneath2016, yang2010}.
+Unlike traditional AC systems or conventional thyristor-based LCC HVDC systems, MMC-HVDC grids exhibit unique fault characteristics that complicate protection design. When a DC fault occurs, the small damping and low impedance of DC networks result in extremely rapid fault current rise rates (typically $di/dt > 10$ kA/ms), with peak currents reaching several tens of kiloamperes within milliseconds. The submodule capacitors in MMC stations rapidly discharge into the fault location, contributing to the fault current even after converter blocking. These characteristics demand ultra-fast fault detection and isolation mechanisms, typically requiring operation within 2-3 ms to prevent equipment damage and maintain system stability \cite{reference1, reference2, sneath2016, yang2010, bucher2016}.
 
 
 
@@ -100,7 +100,7 @@ TW-based protection schemes have emerged as the predominant solution for HVDC tr
 
 To address these limitations, researchers have proposed advanced signal processing techniques that analyze the complete waveform characteristics of traveling waves rather than simple magnitude thresholds. These methods can be broadly categorized into:
 
-\textbf{1) Frequency-domain methods:} Exploiting the frequency-selective attenuation of current-limiting reactors (CLRs) to distinguish fault types. While effective, these methods often suffer from high computational complexity and limited noise immunity.
+\textbf{1) Frequency-domain methods:} Exploiting the frequency-selective attenuation of current-limiting reactors (CLRs) to distinguish fault types. While effective, these methods often suffer from high computational complexity and limited noise immunity \cite{li2018fast}.
 
 \textbf{2) Time-domain pattern analysis:} Utilizing the overall curve characteristics, distortion patterns, and temporal evolution of traveling waves. Recent advances include wavelet analysis, curve fitting, and similarity metrics.
 
@@ -110,7 +110,7 @@ Despite these developments, a systematic comparative evaluation of these advance
 
 Recent research on HVDC protection can be categorized based on the signal processing approach employed:
 
-\textbf{Wavelet-based methods:} Discrete Wavelet Transform (DWT) has been widely applied for transient signal analysis in power systems. The multi-resolution analysis capability of wavelets enables simultaneous time-frequency localization, making it suitable for detecting abrupt changes in traveling waves. Studies have demonstrated that wavelet-based methods can effectively capture fault transient characteristics through energy distribution across decomposition levels \cite{wavelet1, wavelet2}. Energy-based approaches analyze the distribution of signal energy across detail coefficients at different scales, where internal faults exhibit concentrated high-frequency energy (dominant energy in fine-scale details D1-D2) due to sharp wavefronts, while external faults show energy shift toward coarser scales (D3-D4) due to current-limiting reactor filtering effects. Classification is performed by comparing the normalized energy distribution vector of the measured fault signal against reference patterns using Euclidean distance metrics. This energy-based approach offers computational efficiency and robustness to amplitude variations when combined with proper normalization.
+\textbf{Wavelet-based methods:} Discrete Wavelet Transform (DWT) has been widely applied for transient signal analysis in power systems. The multi-resolution analysis capability of wavelets enables simultaneous time-frequency localization, making it suitable for detecting abrupt changes in traveling waves. Studies have demonstrated that wavelet-based methods can effectively capture fault transient characteristics through energy distribution across decomposition levels \cite{wavelet1, wavelet2, magnago1998}. Energy-based approaches analyze the distribution of signal energy across detail coefficients at different scales, where internal faults exhibit concentrated high-frequency energy (dominant energy in fine-scale details D1-D2) due to sharp wavefronts, while external faults show energy shift toward coarser scales (D3-D4) due to current-limiting reactor filtering effects. Classification is performed by comparing the normalized energy distribution vector of the measured fault signal against reference patterns using Euclidean distance metrics. This energy-based approach offers computational efficiency and robustness to amplitude variations when combined with proper normalization.
 
 \textbf{Pattern matching approaches:} DTW and Fréchet distance have been
 recently introduced to HVDC protection. DTW calculates the optimal
@@ -121,7 +121,7 @@ variations and making it robust to wave propagation speed uncertainties
 curves, demonstrating excellent fault resistance tolerance up to
 600~$\Omega$. Additional pattern-matching variants based on
 waveform-fitting residuals and Levenberg--Marquardt optimization have
-also been proposed for HVDC grid protection \cite{pattern1, pattern2},
+also been proposed for HVDC grid protection \cite{pattern1, pattern2, leterme2016},
 further demonstrating the versatility of curve-shape analysis for
 fault discrimination.
 
@@ -229,7 +229,7 @@ This equivalent model accurately represents the MMC behavior during the first tr
 
 \subsection{DC Transmission Line Model}
 
-The DC overhead transmission line is modeled using the J. Marti frequency-dependent transmission line model \cite{marti1982accurate}, implemented in ATP-EMTP, which is based on the Bergeron method for traveling wave propagation \cite{dommel1969}. This model accurately represents frequency-dependent effects including skin effect, ground return path variations, and distributed parameter behavior across a wide frequency range (0.001 Hz to 1 MHz).
+The DC overhead transmission line is modeled using the J. Marti frequency-dependent transmission line model \cite{marti1982accurate}, implemented in ATP-EMTP, which is based on the Bergeron method for traveling wave propagation \cite{dommel1969, greenwood1991}. This model accurately represents frequency-dependent effects including skin effect, ground return path variations, and distributed parameter behavior across a wide frequency range (0.001 Hz to 1 MHz).
 
 The 300 km transmission line is divided into six series-connected 50 km segments, with controllable switches at each junction to facilitate systematic fault testing at various locations (50 km, 100 km, 150 km, 200 km, and 250 km from the relay location).
 
@@ -1036,20 +1036,10 @@ For the 30 HIGH and MEDIUM confidence cases, Cross-Correlation achieves
 % Algorithm 4 - Fréchet Distance of ROCOTW Curves
 % ============================================================================
 
-% ============================================================================
-% SECTION: Fréchet Distance-Based Fault Classification
-% ============================================================================
-% Required packages (add to preamble):
-% \usepackage{graphicx}
-% \usepackage{amsmath}
-% \usepackage{amssymb}
-% \usepackage{subcaption}
-% ============================================================================
-
 \subsection{Algorithm 4: Fréchet Distance-Based ROCOTW Classification}
 \label{sec:fd}
 
-The Fréchet distance provides a robust metric for comparing traveling wave signatures by accounting for both shape similarity and temporal ordering \cite{eiter1994, reference_paper_frechet}. Unlike point-wise distance measures, the Fréchet distance captures the overall geometric correspondence between curves, making it particularly suitable for fault classification where waveform morphology is the discriminating feature.
+The Fréchet distance provides a robust metric for comparing traveling wave signatures by accounting for both shape similarity and temporal ordering \cite{eiter1994, alt1995, reference_paper_frechet}. Unlike point-wise distance measures, the Fréchet distance captures the overall geometric correspondence between curves, making it particularly suitable for fault classification where waveform morphology is the discriminating feature.
 
 \subsubsection{Mathematical Foundation}
 
@@ -1248,10 +1238,6 @@ Table~\ref{tab:fd_parameters} summarizes the key parameters used in the Fréchet
         \bottomrule
     \end{tabular}
 \end{table}
-
-% ============================================================================
-% END OF SECTION
-% ============================================================================
 
 % ============================================================================
 % COMPREHENSIVE RESULTS - ALL ALGORITHMS IN ONE TABLE
@@ -2181,7 +2167,7 @@ Several promising directions for future research are identified:
     
     \item \textbf{Machine learning integration:} Explore deep learning approaches (convolutional neural networks, recurrent neural networks) trained on large fault databases to potentially exceed the accuracy of traditional signal processing methods.
     
-    \item \textbf{Multi-terminal extension:} Extend the comparative analysis to multi-terminal HVDC grids, where fault location and isolation present additional challenges due to multiple possible fault paths.
+    \item \textbf{Multi-terminal extension:} Extend the comparative analysis to multi-terminal HVDC grids, where fault location and isolation present additional challenges due to multiple possible fault paths \cite{beerten2012}.
     
     \item \textbf{Hybrid time-frequency features:} Investigate combined feature extraction using both time-domain (DTW, Fréchet) and frequency-domain (wavelet) characteristics to improve zone boundary discrimination.
     
@@ -2265,6 +2251,37 @@ A. Savitzky and M. J. E. Golay, ``Smoothing and differentiation of data by simpl
 
 \bibitem{eiter1994}
 T. Eiter and H. Mannila, ``Computing discrete Fr\'{e}chet distance,'' Tech. Rep. CD-TR 94/64, Christian Doppler Laboratory for Expert Systems, TU Vienna, Austria, 1994.
+
+% -----------------------------------------------------------------------
+% Nine new references added to reach the target count of 30
+% -----------------------------------------------------------------------
+
+\bibitem{flourentzou2009}
+N. Flourentzou, V. G. Agelidis, and G. D. Demetriades, ``VSC-based HVDC power transmission systems: An overview,'' \emph{IEEE Trans. Power Electron.}, vol. 24, no. 3, pp. 592--602, Mar. 2009.
+
+\bibitem{vanhertem2016}
+D. Van Hertem, O. Gomis-Bellmunt, and J. Liang, Eds., \emph{HVDC Grids: For Offshore and Supergrid of the Future}. Hoboken, NJ, USA: Wiley-IEEE Press, 2016.
+
+\bibitem{bucher2016}
+M. K. Bucher and C. M. Franck, ``Fault current interruption in multiterminal HVDC networks,'' \emph{IEEE Trans. Power Del.}, vol. 31, no. 1, pp. 87--95, Feb. 2016.
+
+\bibitem{leterme2016}
+W. Leterme, J. Beerten, and D. Van Hertem, ``Non-unit protection of HVDC grids with inductive DC cable termination,'' \emph{IEEE Trans. Power Del.}, vol. 31, no. 2, pp. 820--828, Apr. 2016.
+
+\bibitem{li2018fast}
+C. Li, A. M. Gole, and C. Zhao, ``A fast DC fault detection method using DC reactor voltages in HVdc grids,'' \emph{IEEE Trans. Power Del.}, vol. 33, no. 5, pp. 2254--2264, Oct. 2018.
+
+\bibitem{alt1995}
+H. Alt and M. Godau, ``Computing the Fr\'{e}chet distance between two polygonal curves,'' \emph{Int. J. Comput. Geom. Appl.}, vol. 5, nos. 1--2, pp. 75--91, 1995.
+
+\bibitem{magnago1998}
+F. H. Magnago and A. Abur, ``Fault location using wavelets,'' \emph{IEEE Trans. Power Del.}, vol. 13, no. 4, pp. 1475--1480, Oct. 1998.
+
+\bibitem{greenwood1991}
+A. Greenwood, \emph{Electrical Transients in Power Systems}, 2nd ed. New York, NY, USA: Wiley, 1991.
+
+\bibitem{beerten2012}
+J. Beerten, S. Cole, and R. Belmans, ``Generalized steady-state VSC MTDC model for sequential AC/DC power flow algorithms,'' \emph{IEEE Trans. Power Syst.}, vol. 27, no. 2, pp. 821--829, May 2012.
 
 \end{thebibliography}
 
